@@ -1,7 +1,9 @@
 package com.github.kmachida12345.simplemeditationlogger.ui.theme
 
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 object Dimensions {
     object IconSize {
@@ -24,5 +26,13 @@ object Dimensions {
         val Medium: Dp = 16.dp
         val Large: Dp = 24.dp
         val ExtraLarge: Dp = 32.dp
+    }
+
+    object FontSize {
+        val Small: TextUnit = 12.sp
+        val Medium: TextUnit = 16.sp
+        val Large: TextUnit = 20.sp
+        val ExtraLarge: TextUnit = 24.sp
+        val Timer: TextUnit = 72.sp
     }
 }

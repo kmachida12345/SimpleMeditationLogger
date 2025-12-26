@@ -1,5 +1,6 @@
 package com.github.kmachida12345.simplemeditationlogger.ui.home
 
+import androidx.annotation.Dimension
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -24,6 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.github.kmachida12345.simplemeditationlogger.R
+import com.github.kmachida12345.simplemeditationlogger.ui.theme.Dimensions
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.SlateBlue100
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.SlateBlue400
@@ -124,7 +126,7 @@ fun HomeScreen(
                     FilledTonalButton(
                         onClick = { onStartMeditation(uiState.defaultDurationSeconds) },
                         modifier = Modifier
-                            .size(dimensionResource(R.dimen.button_large_size))
+                            .size(Dimensions.ButtonSize.TimerButton)
                             .shadow(24.dp, CircleShape),
                         shape = CircleShape,
                         colors = ButtonDefaults.filledTonalButtonColors(
@@ -139,18 +141,18 @@ fun HomeScreen(
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = null,
                                 tint = Primary,
-                                modifier = Modifier.size(dimensionResource(R.dimen.icon_size_play))
+                                modifier = Modifier.size(Dimensions.IconSize.ExtraLarge)
                             )
-                            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+                            Spacer(modifier = Modifier.height(Dimensions.Spacing.ExtraSmall))
                             Text(
                                 text = formatDurationForDisplay(uiState.defaultDurationSeconds),
-                                fontSize = dimensionResource(R.dimen.text_size_large_timer).value.sp,
+                                fontSize = Dimensions.FontSize.Timer,
                                 fontWeight = FontWeight.Light,
-                                color = SlateBlue800
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = stringResource(R.string.home_min),
-                                fontSize = dimensionResource(R.dimen.text_size_unit).value.sp,
+                                fontSize = Dimensions.FontSize.Small,
                                 fontWeight = FontWeight.Medium,
                                 color = SlateBlue400,
                                 letterSpacing = 0.2.sp
