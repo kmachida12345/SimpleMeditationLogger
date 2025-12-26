@@ -74,6 +74,9 @@ dependencies {
     // Navigation
     implementation(libs.navigation.compose)
     
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+    
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

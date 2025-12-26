@@ -10,7 +10,7 @@ sealed interface Screen {
     data object History : Screen
     
     @Serializable
-    data class Countdown(val durationMinutes: Int) : Screen
+    data class Countdown(val durationSeconds: Int) : Screen
     
     @Serializable
     data class Complete(val durationSeconds: Long) : Screen

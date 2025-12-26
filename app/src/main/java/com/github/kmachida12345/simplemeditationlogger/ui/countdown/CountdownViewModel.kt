@@ -22,7 +22,7 @@ class CountdownViewModel @Inject constructor(
     private val endMeditationSessionUseCase: EndMeditationSessionUseCase
 ) : ViewModel() {
     
-    private val durationMinutes: Int = savedStateHandle["durationMinutes"] ?: 3
+    private val durationSeconds: Int = savedStateHandle["durationSeconds"] ?: 180
     
     private val _uiState = MutableStateFlow(CountdownUiState())
     val uiState: StateFlow<CountdownUiState> = _uiState.asStateFlow()
@@ -39,7 +39,7 @@ class CountdownViewModel @Inject constructor(
     private fun startTimer() {
         if (startTime == null) {
             startTime = Instant.now()
-            endTime = startTime!!.plusSeconds(durationMinutes * 60L)
+            endTime = startTime!!.plusSeconds(durationSeconds.toLong())
         } else if (pausedAtSeconds > 0) {
             // 一時停止から再開
             endTime = Instant.now().plusSeconds(pausedAtSeconds.toLong())

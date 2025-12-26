@@ -30,10 +30,6 @@ fun MeditationNavHost(
             DrawerContent(
                 onClose = {
                     scope.launch { drawerState.close() }
-                },
-                onNavigateToDefaultTime = {
-                    // TODO(feature): デフォルト時間設定ダイアログ
-                    scope.launch { drawerState.close() }
                 }
             )
         }
@@ -50,8 +46,8 @@ fun MeditationNavHost(
                     onOpenDrawer = {
                         scope.launch { drawerState.open() }
                     },
-                    onStartMeditation = { durationMinutes ->
-                        navController.navigate(Screen.Countdown(durationMinutes))
+                    onStartMeditation = { durationSeconds ->
+                        navController.navigate(Screen.Countdown(durationSeconds))
                     }
                 )
             }

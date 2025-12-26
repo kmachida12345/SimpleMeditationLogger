@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.github.kmachida12345.simplemeditationlogger.R
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
@@ -121,9 +122,9 @@ fun HomeScreen(
                     
                     // Main Timer Button
                     FilledTonalButton(
-                        onClick = { onStartMeditation(uiState.defaultDurationMinutes) },
+                        onClick = { onStartMeditation(uiState.defaultDurationSeconds) },
                         modifier = Modifier
-                            .size(256.dp)
+                            .size(dimensionResource(R.dimen.button_large_size))
                             .shadow(24.dp, CircleShape),
                         shape = CircleShape,
                         colors = ButtonDefaults.filledTonalButtonColors(
@@ -138,21 +139,21 @@ fun HomeScreen(
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = null,
                                 tint = Primary,
-                                modifier = Modifier.size(60.dp)
+                                modifier = Modifier.size(dimensionResource(R.dimen.icon_size_play))
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
                             Text(
-                                text = "${uiState.defaultDurationMinutes}",
-                                fontSize = 72.sp,
+                                text = formatDurationForDisplay(uiState.defaultDurationSeconds),
+                                fontSize = dimensionResource(R.dimen.text_size_large_timer).value.sp,
                                 fontWeight = FontWeight.Light,
-                                color = Color.White
+                                color = SlateBlue800
                             )
                             Text(
-                                text = "MIN",
-                                fontSize = 14.sp,
+                                text = stringResource(R.string.home_min),
+                                fontSize = dimensionResource(R.dimen.text_size_unit).value.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = SlateBlue400,
-                                letterSpacing = 2.sp
+                                letterSpacing = 0.2.sp
                             )
                         }
                     }
@@ -218,5 +219,15 @@ fun HomeScreen(
                 }
             }
         }
+    }
+}
+
+private fun formatDurationForDisplay(seconds: Int): String {
+    val minutes = seconds / 60
+    val remainingSeconds = seconds % 60
+    return if (remainingSeconds == 0) {
+        "$minutes"
+    } else {
+        "$minutes:${remainingSeconds.toString().padStart(2, '0')}"
     }
 }

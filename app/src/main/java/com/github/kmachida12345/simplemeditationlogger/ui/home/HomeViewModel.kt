@@ -2,7 +2,9 @@ package com.github.kmachida12345.simplemeditationlogger.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.kmachida12345.simplemeditationlogger.domain.usecase.GetAppSettingsUseCase
+import com.github.kmachida12345.simplemeditationlogger.domain.usecase.GetDefaultDurationUseCase
+import com.github.kmachida12345.simplemeditationlogger.domain.usecase.GetHealthConnectEnabledUseCase
+import com.github.kmachida12345.simplemeditationlogger.domain.usecase.UpdateDefaultDurationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,7 +14,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getAppSettingsUseCase: GetAppSettingsUseCase
+    private val getDefaultDurationUseCase: GetDefaultDurationUseCase,
+    private val getHealthConnectEnabledUseCase: GetHealthConnectEnabledUseCase,
+    private val updateDefaultDurationUseCase: UpdateDefaultDurationUseCase
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -20,12 +24,17 @@ class HomeViewModel @Inject constructor(
     
     init {
         viewModelScope.launch {
-            // 先に初期化してからFlowを購読
-            getAppSettingsUseCase.initialize()
-            getAppSettingsUseCase().collect { settings ->
+            getDefaultDurationUseCase().collect { seconds ->
                 _uiState.value = _uiState.value.copy(
-                    defaultDurationMinutes = settings?.defaultMeditationMinutes ?: 3,
-                    isHealthConnectEnabled = settings?.isHealthConnectEnabled ?: false
+                    defaultDurationSeconds = seconds
+                )
+            }
+        }
+        
+        viewModelScope.launch {
+            getHealthConnectEnabledUseCase().collect { enabled ->
+                _uiState.value = _uiState.value.copy(
+                    isHealthConnectEnabled = enabled
                 )
             }
         }
@@ -44,16 +53,18 @@ class HomeViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(showTimePickerDialog = false)
     }
     
-    fun onTimeSelected(minutes: Int) {
-        _uiState.value = _uiState.value.copy(
-            defaultDurationMinutes = minutes,
-            showTimePickerDialog = false
-        )
+    fun onTimeSelected(seconds: Int) {
+        viewModelScope.launch {
+            updateDefaultDurationUseCase(seconds)
+            _uiState.value = _uiState.value.copy(
+                showTimePickerDialog = false
+            )
+        }
     }
 }
 
 data class HomeUiState(
-    val defaultDurationMinutes: Int = 3,
+    val defaultDurationSeconds: Int = 180,
     val isHealthConnectEnabled: Boolean = false,
     val showTimePickerDialog: Boolean = false
 )

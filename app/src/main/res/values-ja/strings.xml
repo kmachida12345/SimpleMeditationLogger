@@ -38,4 +38,5 @@
     <string name="close">閉じる</string>
     <string name="cancel">キャンセル</string>
     <string name="ok">OK</string>
+    <string name="set_default_time">デフォルト時間の設定</string>
 </resources>

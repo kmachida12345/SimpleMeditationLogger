@@ -38,4 +38,5 @@
     <string name="close">Close</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="set_default_time">Set Default Duration</string>
 </resources>

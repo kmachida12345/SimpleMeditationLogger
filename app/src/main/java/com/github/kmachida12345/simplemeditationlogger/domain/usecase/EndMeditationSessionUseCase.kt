@@ -3,6 +3,7 @@ package com.github.kmachida12345.simplemeditationlogger.domain.usecase
 import com.github.kmachida12345.simplemeditationlogger.data.entity.MeditationSession
 import com.github.kmachida12345.simplemeditationlogger.data.repository.AppSettingsRepository
 import com.github.kmachida12345.simplemeditationlogger.data.repository.MeditationSessionRepository
+import kotlinx.coroutines.flow.first
 import java.time.Instant
 import javax.inject.Inject
 
@@ -27,8 +28,8 @@ class EndMeditationSessionUseCase @Inject constructor(
             val savedSession = session.copy(id = sessionId.toInt())
             
             // ヘルスコネクト連携が有効なら同期を試みる（将来的にはWorkerで非同期実行）
-            val settings = settingsRepository.getSettingsSync()
-            if (settings?.isHealthConnectEnabled == true) {
+            val healthConnectEnabled = settingsRepository.getHealthConnectEnabled().first()
+            if (healthConnectEnabled) {
                 // TODO: バックグラウンドで同期処理をトリガー（WorkManager）
             }
             

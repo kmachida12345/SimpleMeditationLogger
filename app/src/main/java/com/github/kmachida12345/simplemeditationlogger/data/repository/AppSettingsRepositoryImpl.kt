@@ -1,35 +1,25 @@
 package com.github.kmachida12345.simplemeditationlogger.data.repository
 
-import com.github.kmachida12345.simplemeditationlogger.data.dao.AppSettingsDao
-import com.github.kmachida12345.simplemeditationlogger.data.entity.AppSettings
+import com.github.kmachida12345.simplemeditationlogger.data.datastore.AppSettingsDataStore
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class AppSettingsRepositoryImpl @Inject constructor(
-    private val dao: AppSettingsDao
+    private val dataStore: AppSettingsDataStore
 ) : AppSettingsRepository {
     
-    override fun getSettings(): Flow<AppSettings?> {
-        return dao.getSettings()
-    }
+    override fun getDefaultDurationSeconds(): Flow<Int> = 
+        dataStore.defaultDurationSeconds
     
-    override suspend fun getSettingsSync(): AppSettings? {
-        return dao.getSettingsSync()
-    }
+    override fun getHealthConnectEnabled(): Flow<Boolean> = 
+        dataStore.healthConnectEnabled
     
-    override suspend fun updateDefaultMeditationMinutes(minutes: Int) {
-        val currentSettings = dao.getSettingsSync() ?: AppSettings()
-        dao.updateSettings(currentSettings.copy(defaultMeditationMinutes = minutes))
+    override suspend fun updateDefaultDurationSeconds(seconds: Int) {
+        require(seconds > 0) { "Duration must be positive" }
+        dataStore.updateDefaultDurationSeconds(seconds)
     }
     
     override suspend fun updateHealthConnectEnabled(enabled: Boolean) {
-        val currentSettings = dao.getSettingsSync() ?: AppSettings()
-        dao.updateSettings(currentSettings.copy(isHealthConnectEnabled = enabled))
-    }
-    
-    override suspend fun initializeDefaultSettings() {
-        if (dao.getSettingsSync() == null) {
-            dao.insertSettings(AppSettings())
-        }
+        dataStore.updateHealthConnectEnabled(enabled)
     }
 }

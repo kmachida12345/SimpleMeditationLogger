@@ -12,6 +12,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,16 +27,25 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.kmachida12345.simplemeditationlogger.BuildConfig
 import com.github.kmachida12345.simplemeditationlogger.R
+import com.github.kmachida12345.simplemeditationlogger.ui.theme.Dimensions
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
 import java.util.Locale
 
 @Composable
 fun DrawerContent(
     onClose: () -> Unit,
-    onNavigateToDefaultTime: () -> Unit,
     viewModel: DrawerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    
+    // Time Picker Dialog
+    if (uiState.showTimePickerDialog) {
+        TimePickerDialog(
+            currentMinutes = uiState.defaultMeditationSeconds / 60,
+            onDismiss = { viewModel.onDismissTimePickerDialog() },
+            onConfirm = { seconds -> viewModel.onTimeSelected(seconds) }
+        )
+    }
     
     ModalDrawerSheet(
         modifier = Modifier.width(320.dp),
@@ -55,10 +67,10 @@ fun DrawerContent(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(Dimensions.Spacing.Medium)
                 ) {
                     Surface(
-                        modifier = Modifier.size(40.dp),
+                        modifier = Modifier.size(Dimensions.ButtonSize.Small),
                         shape = CircleShape,
                         color = Primary.copy(alpha = 0.1f)
                     ) {
@@ -67,7 +79,7 @@ fun DrawerContent(
                                 imageVector = Icons.Default.Spa,
                                 contentDescription = null,
                                 tint = Primary,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(Dimensions.IconSize.Medium)
                             )
                         }
                     }
@@ -85,7 +97,7 @@ fun DrawerContent(
                 }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Dimensions.Spacing.Medium))
             
             // Settings Section
             SectionHeader(stringResource(R.string.drawer_settings))
@@ -93,8 +105,8 @@ fun DrawerContent(
             DrawerMenuItem(
                 icon = Icons.Default.Timer,
                 title = stringResource(R.string.drawer_default_time),
-                subtitle = "${uiState.defaultMeditationMinutes} min",
-                onClick = onNavigateToDefaultTime
+                subtitle = formatDurationDisplay(uiState.defaultMeditationSeconds),
+                onClick = { viewModel.onDefaultTimeClick() }
             )
             
             DrawerMenuItemWithSwitch(
@@ -104,9 +116,9 @@ fun DrawerContent(
                 onCheckedChange = { viewModel.onHealthConnectToggle(it) }
             )
             
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Dimensions.Spacing.Small))
+            HorizontalDivider(modifier = Modifier.padding(horizontal = Dimensions.Spacing.Medium))
+            Spacer(modifier = Modifier.height(Dimensions.Spacing.Small))
             
             // Support Section
             SectionHeader(stringResource(R.string.drawer_support))
@@ -171,12 +183,12 @@ private fun DrawerMenuItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(Dimensions.Spacing.Medium),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(Dimensions.Spacing.Medium)
         ) {
             Surface(
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(Dimensions.ButtonSize.Small),
                 shape = RoundedCornerShape(12.dp),
                 color = Color(0xFFF0F4F8)
             ) {
@@ -185,7 +197,7 @@ private fun DrawerMenuItem(
                         imageVector = icon,
                         contentDescription = null,
                         tint = Color.Gray,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(Dimensions.IconSize.Small)
                     )
                 }
             }
@@ -201,7 +213,7 @@ private fun DrawerMenuItem(
             if (subtitle != null) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(Dimensions.Spacing.ExtraSmall)
                 ) {
                     Text(
                         text = subtitle,
@@ -213,7 +225,7 @@ private fun DrawerMenuItem(
                         imageVector = Icons.Default.ChevronRight,
                         contentDescription = null,
                         tint = Color.Gray,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(Dimensions.IconSize.Small)
                     )
                 }
             }
@@ -237,12 +249,12 @@ private fun DrawerMenuItemWithSwitch(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(Dimensions.Spacing.Medium),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(Dimensions.Spacing.Medium)
         ) {
             Surface(
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(Dimensions.ButtonSize.Small),
                 shape = RoundedCornerShape(12.dp),
                 color = Color(0xFFF0F4F8)
             ) {
@@ -251,7 +263,7 @@ private fun DrawerMenuItemWithSwitch(
                         imageVector = icon,
                         contentDescription = null,
                         tint = Color.Gray,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(Dimensions.IconSize.Small)
                     )
                 }
             }
@@ -269,5 +281,66 @@ private fun DrawerMenuItemWithSwitch(
                 modifier = Modifier.height(28.dp)
             )
         }
+    }
+}
+
+@Composable
+private fun TimePickerDialog(
+    currentMinutes: Int,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var selectedMinutes by remember { mutableIntStateOf(currentMinutes) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.set_default_time)) },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "$selectedMinutes min",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Primary
+                )
+                Spacer(modifier = Modifier.height(Dimensions.Spacing.Medium))
+                Slider(
+                    value = selectedMinutes.toFloat(),
+                    onValueChange = { selectedMinutes = it.toInt() },
+                    valueRange = 1f..60f,
+                    steps = 58
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("1 min", fontSize = 12.sp, color = Color.Gray)
+                    Text("60 min", fontSize = 12.sp, color = Color.Gray)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(selectedMinutes * 60) }) {
+                Text(stringResource(R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+private fun formatDurationDisplay(seconds: Int): String {
+    val minutes = seconds / 60
+    val remainingSeconds = seconds % 60
+    return if (remainingSeconds == 0) {
+        "$minutes min"
+    } else {
+        "$minutes:${remainingSeconds.toString().padStart(2, '0')}"
     }
 }

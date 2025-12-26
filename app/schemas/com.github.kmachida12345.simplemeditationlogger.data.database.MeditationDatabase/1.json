@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b8f72da5e7662891a1d1408e6e3d3418",
+    "identityHash": "445ac26734cfd4c578b4ac36d6652f6a",
     "entities": [
       {
         "tableName": "meditation_sessions",
@@ -69,44 +69,12 @@
           }
         ],
         "foreignKeys": []
-      },
-      {
-        "tableName": "app_settings",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `defaultMeditationMinutes` INTEGER NOT NULL, `isHealthConnectEnabled` INTEGER NOT NULL, PRIMARY KEY(`id`))",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "defaultMeditationMinutes",
-            "columnName": "defaultMeditationMinutes",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isHealthConnectEnabled",
-            "columnName": "isHealthConnectEnabled",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "id"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b8f72da5e7662891a1d1408e6e3d3418')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '445ac26734cfd4c578b4ac36d6652f6a')"
     ]
   }
 }
