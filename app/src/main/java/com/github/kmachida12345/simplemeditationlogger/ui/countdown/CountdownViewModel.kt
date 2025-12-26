@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -28,7 +29,8 @@ class CountdownViewModel @Inject constructor(
     
     private var timerJob: Job? = null
     private var startTime: Instant? = null
-    private var remainingSeconds: Int = durationMinutes * 60
+    private var endTime: Instant? = null
+    private var pausedAtSeconds: Int = 0
     
     init {
         startTimer()
@@ -37,19 +39,26 @@ class CountdownViewModel @Inject constructor(
     private fun startTimer() {
         if (startTime == null) {
             startTime = Instant.now()
+            endTime = startTime!!.plusSeconds(durationMinutes * 60L)
+        } else if (pausedAtSeconds > 0) {
+            // 一時停止から再開
+            endTime = Instant.now().plusSeconds(pausedAtSeconds.toLong())
         }
+        
+        val targetEndTime = endTime ?: return
         
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
-            while (remainingSeconds > 0) {
+            while (Instant.now().isBefore(targetEndTime)) {
+                val remaining = Duration.between(Instant.now(), targetEndTime).seconds
                 _uiState.value = _uiState.value.copy(
-                    remainingSeconds = remainingSeconds,
+                    remainingSeconds = remaining.toInt().coerceAtLeast(0),
                     isPaused = false
                 )
                 delay(1.seconds)
-                remainingSeconds--
             }
             // タイマー終了
+            _uiState.value = _uiState.value.copy(remainingSeconds = 0)
             onTimerComplete()
         }
     }
@@ -59,6 +68,7 @@ class CountdownViewModel @Inject constructor(
             startTimer()
         } else {
             timerJob?.cancel()
+            pausedAtSeconds = _uiState.value.remainingSeconds
             _uiState.value = _uiState.value.copy(isPaused = true)
         }
     }
@@ -77,14 +87,25 @@ class CountdownViewModel @Inject constructor(
             val start = startTime ?: return@launch
             val end = Instant.now()
             
-            endMeditationSessionUseCase(start, end).onSuccess { savedSession ->
-                // 実際の経過時間（分）を計算
-                val actualDurationMinutes = ((end.epochSecond - start.epochSecond) / 60).toInt()
-                _uiState.value = _uiState.value.copy(
-                    isCompleted = true,
-                    actualDurationMinutes = actualDurationMinutes
-                )
-            }
+            endMeditationSessionUseCase(start, end)
+                .onSuccess { savedSession ->
+                    // 実際の経過時間（分）を計算
+                    val actualDurationMinutes = ((end.epochSecond - start.epochSecond) / 60).toInt()
+                    _uiState.value = _uiState.value.copy(
+                        isCompleted = true,
+                        actualDurationMinutes = actualDurationMinutes
+                    )
+                }
+                .onFailure { error ->
+                    // エラー時も完了扱いにするが、ログは記録
+                    android.util.Log.e("CountdownViewModel", "Failed to save session", error)
+                    val actualDurationMinutes = ((end.epochSecond - start.epochSecond) / 60).toInt()
+                    _uiState.value = _uiState.value.copy(
+                        isCompleted = true,
+                        actualDurationMinutes = actualDurationMinutes,
+                        error = "Failed to save session"
+                    )
+                }
         }
     }
     
@@ -98,5 +119,6 @@ data class CountdownUiState(
     val remainingSeconds: Int = 0,
     val isPaused: Boolean = false,
     val isCompleted: Boolean = false,
-    val actualDurationMinutes: Int = 0
+    val actualDurationMinutes: Int = 0,
+    val error: String? = null
 )
