@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import com.github.kmachida12345.simplemeditationlogger.R
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.SlateBlue100
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.SlateBlue400
@@ -56,7 +58,7 @@ fun HomeScreen(
                     IconButton(onClick = onOpenDrawer) {
                         Icon(
                             imageVector = Icons.Default.Menu,
-                            contentDescription = "メニュー",
+                            contentDescription = stringResource(R.string.home_menu),
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -133,7 +135,7 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "時間設定",
+                                text = stringResource(R.string.home_time_adjust),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -162,7 +164,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "HEALTH CONNECT",
+                                    text = stringResource(R.string.home_health_connect).uppercase(),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SlateBlue400
@@ -199,7 +201,7 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "ホーム",
+                                text = stringResource(R.string.home_title),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Primary
@@ -216,13 +218,13 @@ fun HomeScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Favorite,
-                                    contentDescription = "履歴",
+                                    contentDescription = stringResource(R.string.history_title),
                                     tint = SlateBlue400,
                                     modifier = Modifier.size(26.dp)
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "履歴",
+                                    text = stringResource(R.string.history_title),
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = SlateBlue400

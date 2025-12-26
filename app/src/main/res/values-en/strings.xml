@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Simple Meditation Logger</string>
+    
+    <!-- Home Screen -->
+    <string name="home_title">Home</string>
+    <string name="home_menu">Menu</string>
+    <string name="home_play">Start</string>
+    <string name="home_time_adjust">Adjust Time</string>
+    <string name="home_health_connect">Health Connect</string>
+    <string name="home_min">MIN</string>
+    
+    <!-- History Screen -->
+    <string name="history_title">History</string>
+    <string name="history_minutes">min</string>
+    
+    <!-- Countdown Screen -->
+    <string name="countdown_title">Meditation</string>
+    <string name="countdown_remaining">Remaining</string>
+    <string name="countdown_pause">Pause</string>
+    <string name="countdown_resume">Resume</string>
+    <string name="countdown_end">End</string>
+    
+    <!-- Complete Screen -->
+    <string name="complete_title">Well Done!</string>
+    <string name="complete_health_saved">Saved to Health Connect</string>
+    <string name="complete_back_home">Back to Home</string>
+    
+    <!-- Drawer Menu -->
+    <string name="drawer_settings">Settings</string>
+    <string name="drawer_default_time">Default Duration</string>
+    <string name="drawer_health_connect">Health Connect</string>
+    <string name="drawer_support">Support</string>
+    <string name="drawer_about">About</string>
+    <string name="drawer_privacy">Privacy Policy</string>
+    <string name="drawer_version">Ver %1$s</string>
+    
+    <!-- Common -->
+    <string name="close">Close</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+</resources>
