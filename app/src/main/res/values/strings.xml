@@ -39,4 +39,6 @@
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="set_default_time">Set Default Duration</string>
+    <string name="default_duration">Default Duration</string>
+    <string name="duration_picker_label">%1$d minutes</string>
 </resources>
