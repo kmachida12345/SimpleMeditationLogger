@@ -1,5 +1,7 @@
 package com.github.kmachida12345.simplemeditationlogger.ui.drawer
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,6 +32,7 @@ import com.github.kmachida12345.simplemeditationlogger.BuildConfig
 import com.github.kmachida12345.simplemeditationlogger.R
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Dimensions
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import java.util.Locale
 
 @Composable
@@ -37,6 +41,7 @@ fun DrawerContent(
     viewModel: DrawerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
     
     // Time Picker Dialog
     if (uiState.showTimePickerDialog) {
@@ -133,8 +138,20 @@ fun DrawerContent(
             DrawerMenuItem(
                 icon = Icons.Default.Shield,
                 title = stringResource(R.string.drawer_privacy),
-                // TODO(feature): Privacy画面実装
-                onClick = { }
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        data = Uri.parse("https://kmachida12345.github.io/SimpleMeditationLogger/privacy_policy.html")
+                    }
+                    context.startActivity(intent)
+                }
+            )
+            
+            DrawerMenuItem(
+                icon = Icons.Default.Description,
+                title = stringResource(R.string.drawer_licenses),
+                onClick = {
+                    context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
+                }
             )
             
             Spacer(modifier = Modifier.weight(1f))

@@ -2,4 +2,11 @@
 <resources>
 
     <style name="Theme.SimpleMeditationLogger" parent="android:Theme.Material.Light.NoActionBar" />
+    
+    <!-- Theme for OSS Licenses Activity -->
+    <style name="Theme.SimpleMeditationLogger.OssLicenses" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/primary</item>
+    </style>
 </resources>

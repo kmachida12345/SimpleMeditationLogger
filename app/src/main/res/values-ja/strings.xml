@@ -32,6 +32,7 @@
     <string name="drawer_support">サポート</string>
     <string name="drawer_about">アプリについて</string>
     <string name="drawer_privacy">プライバシーポリシー</string>
+    <string name="drawer_licenses">オープンソースライセンス</string>
     <string name="drawer_version">Ver %1$s</string>
     
     <!-- Common -->
