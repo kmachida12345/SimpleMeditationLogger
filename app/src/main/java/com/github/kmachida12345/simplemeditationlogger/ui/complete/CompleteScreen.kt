@@ -91,32 +91,32 @@ fun CompleteScreen(
                 
                 Spacer(modifier = Modifier.height(32.dp))
                 
-                // Health Connect Badge
-                if (isHealthConnectSynced) {
-                    Surface(
-                        shape = CircleShape,
-                        color = Color(0xFFF0F4F8)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Favorite,
-                                contentDescription = null,
-                                tint = Color.Gray,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.complete_health_saved),
-                                fontSize = 14.sp,
-                                color = Color.Gray
-                            )
-                        }
-                    }
-                }
+                // TODO: Health Connect Badge
+//                if (isHealthConnectSynced) {
+//                    Surface(
+//                        shape = CircleShape,
+//                        color = Color(0xFFF0F4F8)
+//                    ) {
+//                        Row(
+//                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+//                            verticalAlignment = Alignment.CenterVertically,
+//                            horizontalArrangement = Arrangement.Center
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.Default.Favorite,
+//                                contentDescription = null,
+//                                tint = Color.Gray,
+//                                modifier = Modifier.size(18.dp)
+//                            )
+//                            Spacer(modifier = Modifier.width(8.dp))
+//                            Text(
+//                                text = stringResource(R.string.complete_health_saved),
+//                                fontSize = 14.sp,
+//                                color = Color.Gray
+//                            )
+//                        }
+//                    }
+//                }
             }
             
             // Footer Button

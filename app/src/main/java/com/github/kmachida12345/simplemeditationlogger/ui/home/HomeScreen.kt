@@ -162,62 +162,62 @@ fun HomeScreen(
                     
                     Spacer(modifier = Modifier.height(40.dp))
                     
-                    // Time Adjust Button
-                    OutlinedButton(
-                        onClick = { viewModel.onAdjustTime() },
-                        modifier = Modifier.size(176.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color(0xFFF0F4F8)
-                        )
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = null,
-                                modifier = Modifier.size(36.dp)
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(R.string.home_time_adjust),
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
+                    // TODO: Time Adjust Button
+//                    OutlinedButton(
+//                        onClick = { viewModel.onAdjustTime() },
+//                        modifier = Modifier.size(176.dp),
+//                        shape = CircleShape,
+//                        colors = ButtonDefaults.outlinedButtonColors(
+//                            containerColor = Color(0xFFF0F4F8)
+//                        )
+//                    ) {
+//                        Column(
+//                            horizontalAlignment = Alignment.CenterHorizontally
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.Default.Add,
+//                                contentDescription = null,
+//                                modifier = Modifier.size(36.dp)
+//                            )
+//                            Spacer(modifier = Modifier.height(4.dp))
+//                            Text(
+//                                text = stringResource(R.string.home_time_adjust),
+//                                fontSize = 12.sp,
+//                                fontWeight = FontWeight.Bold
+//                            )
+//                        }
+//                    }
+//
+//                    Spacer(modifier = Modifier.height(32.dp))
                     
-                    Spacer(modifier = Modifier.height(32.dp))
-                    
-                    // Health Connect Badge
-                    if (uiState.isHealthConnectEnabled) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surface,
-                            modifier = Modifier.border(1.dp, SlateBlue100, CircleShape)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Favorite,
-                                    contentDescription = null,
-                                    tint = Primary,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = stringResource(R.string.home_health_connect).uppercase(Locale.ROOT),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = SlateBlue400
-                                )
-                            }
-                        }
-                    }
+                    // TODO: Health Connect Badge
+//                    if (uiState.isHealthConnectEnabled) {
+//                        Surface(
+//                            shape = CircleShape,
+//                            color = MaterialTheme.colorScheme.surface,
+//                            modifier = Modifier.border(1.dp, SlateBlue100, CircleShape)
+//                        ) {
+//                            Row(
+//                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+//                                verticalAlignment = Alignment.CenterVertically,
+//                                horizontalArrangement = Arrangement.Center
+//                            ) {
+//                                Icon(
+//                                    imageVector = Icons.Default.Favorite,
+//                                    contentDescription = null,
+//                                    tint = Primary,
+//                                    modifier = Modifier.size(18.dp)
+//                                )
+//                                Spacer(modifier = Modifier.width(8.dp))
+//                                Text(
+//                                    text = stringResource(R.string.home_health_connect).uppercase(Locale.ROOT),
+//                                    fontSize = 11.sp,
+//                                    fontWeight = FontWeight.Bold,
+//                                    color = SlateBlue400
+//                                )
+//                            }
+//                        }
+//                    }
                 }
             }
         }
