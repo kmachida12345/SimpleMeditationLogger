@@ -32,6 +32,7 @@ import com.github.kmachida12345.simplemeditationlogger.ui.theme.SlateBlue800
 fun HomeScreen(
     onNavigateToHistory: () -> Unit,
     onOpenDrawer: () -> Unit,
+    onStartMeditation: (Int) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -119,7 +120,7 @@ fun HomeScreen(
                     
                     // Main Timer Button
                     FilledTonalButton(
-                        onClick = { viewModel.onStartMeditation() },
+                        onClick = { onStartMeditation(uiState.defaultDurationMinutes) },
                         modifier = Modifier
                             .size(256.dp)
                             .shadow(24.dp, CircleShape),
