@@ -10,7 +10,7 @@ import com.github.kmachida12345.simplemeditationlogger.data.entity.MeditationSes
 
 @Database(
     entities = [MeditationSession::class, AppSettings::class],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

@@ -19,18 +19,9 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
     
     init {
-        loadSettings()
-        initializeSettings()
-    }
-    
-    private fun initializeSettings() {
         viewModelScope.launch {
+            // 先に初期化してからFlowを購読
             getAppSettingsUseCase.initialize()
-        }
-    }
-    
-    private fun loadSettings() {
-        viewModelScope.launch {
             getAppSettingsUseCase().collect { settings ->
                 _uiState.value = _uiState.value.copy(
                     defaultDurationMinutes = settings?.defaultMeditationMinutes ?: 3,
