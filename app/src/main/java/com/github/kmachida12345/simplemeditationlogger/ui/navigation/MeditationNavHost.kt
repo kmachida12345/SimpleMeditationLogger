@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.github.kmachida12345.simplemeditationlogger.ui.complete.CompleteScreen
 import com.github.kmachida12345.simplemeditationlogger.ui.countdown.CountdownScreen
+import com.github.kmachida12345.simplemeditationlogger.ui.history.HistoryScreen
 import com.github.kmachida12345.simplemeditationlogger.ui.home.HomeScreen
 
 @Composable
@@ -33,7 +34,13 @@ fun MeditationNavHost(
         }
         
         composable<Screen.History> {
-            // TODO: 履歴画面実装
+            HistoryScreen(
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home) {
+                        popUpTo<Screen.Home> { inclusive = true }
+                    }
+                }
+            )
         }
         
         composable<Screen.Countdown> { backStackEntry ->
