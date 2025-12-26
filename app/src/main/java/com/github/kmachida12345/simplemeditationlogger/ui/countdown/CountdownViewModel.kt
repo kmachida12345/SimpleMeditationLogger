@@ -77,8 +77,13 @@ class CountdownViewModel @Inject constructor(
             val start = startTime ?: return@launch
             val end = Instant.now()
             
-            endMeditationSessionUseCase(start, end).onSuccess {
-                _uiState.value = _uiState.value.copy(isCompleted = true)
+            endMeditationSessionUseCase(start, end).onSuccess { savedSession ->
+                // 実際の経過時間（分）を計算
+                val actualDurationMinutes = ((end.epochSecond - start.epochSecond) / 60).toInt()
+                _uiState.value = _uiState.value.copy(
+                    isCompleted = true,
+                    actualDurationMinutes = actualDurationMinutes
+                )
             }
         }
     }
@@ -92,5 +97,6 @@ class CountdownViewModel @Inject constructor(
 data class CountdownUiState(
     val remainingSeconds: Int = 0,
     val isPaused: Boolean = false,
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val actualDurationMinutes: Int = 0
 )

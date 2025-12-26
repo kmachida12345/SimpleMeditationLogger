@@ -148,6 +148,7 @@ fun CompleteScreen(
 }
 
 private fun formatDuration(durationMinutes: Int): String {
+    // 分単位で表示（秒は切り捨て）
     val hours = durationMinutes / 60
     val minutes = durationMinutes % 60
     

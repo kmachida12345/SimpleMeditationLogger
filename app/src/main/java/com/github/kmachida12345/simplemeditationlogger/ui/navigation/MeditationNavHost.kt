@@ -42,8 +42,8 @@ fun MeditationNavHost(
                 onBack = {
                     navController.popBackStack()
                 },
-                onComplete = {
-                    navController.navigate(Screen.Complete(countdown.durationMinutes)) {
+                onComplete = { actualDurationMinutes ->
+                    navController.navigate(Screen.Complete(actualDurationMinutes)) {
                         popUpTo<Screen.Countdown> { inclusive = true }
                     }
                 }

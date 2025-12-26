@@ -30,14 +30,14 @@ import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
 @Composable
 fun CountdownScreen(
     onBack: () -> Unit,
-    onComplete: () -> Unit,
+    onComplete: (Int) -> Unit,
     viewModel: CountdownViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
     // 完了時の遷移
     if (uiState.isCompleted) {
-        onComplete()
+        onComplete(uiState.actualDurationMinutes)
     }
     
     Scaffold(
