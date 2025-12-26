@@ -63,39 +63,6 @@ fun CountdownScreen(
                         contentDescription = stringResource(R.string.close)
                     )
                 }
-                
-                // Health Connect Badge
-                Surface(
-                    shape = CircleShape,
-                    color = Color(0xFFF0F4F8)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = null,
-                            tint = Primary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.home_health_connect).uppercase(Locale.ROOT),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.Gray
-                        )
-                    }
-                }
-                
-                IconButton(onClick = { }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = null
-                    )
-                }
             }
             
             // Main Content
@@ -106,13 +73,6 @@ fun CountdownScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = stringResource(R.string.countdown_title),
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 64.dp)
-                )
-                
                 // Timer Display with Ripple Animation
                 Box(
                     contentAlignment = Alignment.Center
