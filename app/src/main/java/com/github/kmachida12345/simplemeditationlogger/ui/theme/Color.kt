@@ -18,3 +18,6 @@ val SlateBlue600 = Color(0xFF486581)
 val SlateBlue700 = Color(0xFF334E68)
 val SlateBlue800 = Color(0xFF243B53)
 val SlateBlue900 = Color(0xFF102A43)
+
+// Common Background Colors
+val SurfaceLight = Color(0xFFF0F4F8)

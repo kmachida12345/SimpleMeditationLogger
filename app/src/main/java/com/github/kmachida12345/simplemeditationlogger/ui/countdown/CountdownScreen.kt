@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.kmachida12345.simplemeditationlogger.R
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
+import java.util.Locale
 
 @Composable
 fun CountdownScreen(
@@ -81,7 +82,7 @@ fun CountdownScreen(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = stringResource(R.string.home_health_connect).uppercase(),
+                            text = stringResource(R.string.home_health_connect).uppercase(Locale.ROOT),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.Gray
@@ -138,7 +139,7 @@ fun CountdownScreen(
                                 letterSpacing = (-4).sp
                             )
                             Text(
-                                text = stringResource(R.string.countdown_remaining).uppercase(),
+                                text = stringResource(R.string.countdown_remaining).uppercase(Locale.ROOT),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color.Gray,

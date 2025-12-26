@@ -21,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.kmachida12345.simplemeditationlogger.R
 import com.github.kmachida12345.simplemeditationlogger.data.entity.MeditationSession
 import com.github.kmachida12345.simplemeditationlogger.data.entity.durationMinutes
+import com.github.kmachida12345.simplemeditationlogger.ui.theme.Dimensions
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -60,7 +61,7 @@ fun HistoryScreen(
                         Icon(
                             imageVector = Icons.Default.Home,
                             contentDescription = stringResource(R.string.home_title),
-                            modifier = Modifier.size(26.dp)
+                            modifier = Modifier.size(Dimensions.IconSize.Medium)
                         ) 
                     },
                     label = { 
@@ -77,7 +78,7 @@ fun HistoryScreen(
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = stringResource(R.string.history_title),
-                            modifier = Modifier.size(26.dp)
+                            modifier = Modifier.size(Dimensions.IconSize.Medium)
                         ) 
                     },
                     label = { 
@@ -109,13 +110,16 @@ fun HistoryScreen(
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp)
+                        contentPadding = PaddingValues(
+                            horizontal = Dimensions.Spacing.Large, 
+                            vertical = Dimensions.Spacing.Medium
+                        )
                     ) {
                         items(uiState.sessions) { session ->
                             HistoryItem(session = session)
                             if (session != uiState.sessions.last()) {
                                 HorizontalDivider(
-                                    modifier = Modifier.padding(vertical = 16.dp),
+                                    modifier = Modifier.padding(vertical = Dimensions.Spacing.Medium),
                                     color = Color(0xFFF1F5F9)
                                 )
                             }
@@ -129,7 +133,13 @@ fun HistoryScreen(
 
 @Composable
 private fun HistoryItem(session: MeditationSession) {
-    val dateFormatter = DateTimeFormatter.ofPattern("yyyy年M月d日", Locale.getDefault())
+    // 多言語対応の日付フォーマット
+    val dateFormatter = if (Locale.getDefault().language == "ja") {
+        DateTimeFormatter.ofPattern("yyyy年M月d日", Locale.JAPAN)
+    } else {
+        DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US)
+    }
+    
     val localDate = session.startTime.atZone(ZoneId.systemDefault()).toLocalDate()
     val formattedDate = localDate.format(dateFormatter)
     
@@ -176,7 +186,7 @@ private fun EmptyState(modifier: Modifier = Modifier) {
             text = "📊",
             fontSize = 64.sp
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimensions.Spacing.Medium))
         Text(
             text = "No meditation history yet",
             fontSize = 16.sp,
@@ -189,3 +199,4 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         )
     }
 }
+

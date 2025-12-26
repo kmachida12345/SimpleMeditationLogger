@@ -32,7 +32,7 @@ fun MeditationNavHost(
                     scope.launch { drawerState.close() }
                 },
                 onNavigateToDefaultTime = {
-                    // TODO: デフォルト時間設定ダイアログ
+                    // TODO(feature): デフォルト時間設定ダイアログ
                     scope.launch { drawerState.close() }
                 }
             )

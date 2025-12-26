@@ -114,13 +114,15 @@ fun DrawerContent(
             DrawerMenuItem(
                 icon = Icons.Default.Info,
                 title = stringResource(R.string.drawer_about),
-                onClick = { /* TODO: About画面 */ }
+                // TODO(feature): About画面実装
+                onClick = { }
             )
             
             DrawerMenuItem(
                 icon = Icons.Default.Shield,
                 title = stringResource(R.string.drawer_privacy),
-                onClick = { /* TODO: Privacy画面 */ }
+                // TODO(feature): Privacy画面実装
+                onClick = { }
             )
             
             Spacer(modifier = Modifier.weight(1f))

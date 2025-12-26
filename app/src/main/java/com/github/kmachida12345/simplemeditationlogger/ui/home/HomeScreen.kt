@@ -27,6 +27,7 @@ import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.SlateBlue100
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.SlateBlue400
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.SlateBlue800
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
@@ -206,7 +207,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = stringResource(R.string.home_health_connect).uppercase(),
+                                    text = stringResource(R.string.home_health_connect).uppercase(Locale.ROOT),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SlateBlue400
