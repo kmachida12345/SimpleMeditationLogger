@@ -18,9 +18,9 @@ class EndMeditationSessionUseCaseTest {
     private val useCase = EndMeditationSessionUseCase(sessionRepository, settingsRepository)
     
     @Test
-    fun `invoke saves session to repository`() = runTest {
+    fun `invoke saves session to repository and returns session`() = runTest {
         // Given
-        val startTime = Instant.now().minusSeconds(900) // 15分前
+        val startTime = Instant.now().minusSeconds(900)
         val endTime = Instant.now()
         coEvery { sessionRepository.insertSession(any()) } returns 1L
         coEvery { settingsRepository.getSettingsSync() } returns AppSettings()
@@ -30,7 +30,10 @@ class EndMeditationSessionUseCaseTest {
         
         // Then
         assertTrue(result.isSuccess)
-        assertEquals(1L, result.getOrThrow())
+        val session = result.getOrThrow()
+        assertEquals(1, session.id)
+        assertEquals(startTime, session.startTime)
+        assertEquals(endTime, session.endTime)
         coVerify(exactly = 1) { sessionRepository.insertSession(any()) }
     }
     

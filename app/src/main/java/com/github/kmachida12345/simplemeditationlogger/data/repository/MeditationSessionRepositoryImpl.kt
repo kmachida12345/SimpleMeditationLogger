@@ -43,26 +43,40 @@ class MeditationSessionRepositoryImpl @Inject constructor(
         dao.deleteSession(session)
     }
     
-    override suspend fun markAsSynced(sessionId: Int, healthConnectRecordId: String) {
-        val session = dao.getSessionById(sessionId) ?: return
-        dao.updateSession(
-            session.copy(
-                isSyncedToHealthConnect = true,
-                healthConnectRecordId = healthConnectRecordId,
-                syncErrorMessage = null,
-                lastSyncAttemptTime = Instant.now()
+    override suspend fun markAsSynced(sessionId: Int, healthConnectRecordId: String): Result<Unit> {
+        return try {
+            val session = dao.getSessionById(sessionId)
+                ?: return Result.failure(IllegalArgumentException("Session not found: $sessionId"))
+            
+            dao.updateSession(
+                session.copy(
+                    isSyncedToHealthConnect = true,
+                    healthConnectRecordId = healthConnectRecordId,
+                    syncErrorMessage = null,
+                    lastSyncAttemptTime = Instant.now()
+                )
             )
-        )
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
     
-    override suspend fun markSyncFailed(sessionId: Int, errorMessage: String) {
-        val session = dao.getSessionById(sessionId) ?: return
-        dao.updateSession(
-            session.copy(
-                isSyncedToHealthConnect = false,
-                syncErrorMessage = errorMessage,
-                lastSyncAttemptTime = Instant.now()
+    override suspend fun markSyncFailed(sessionId: Int, errorMessage: String): Result<Unit> {
+        return try {
+            val session = dao.getSessionById(sessionId)
+                ?: return Result.failure(IllegalArgumentException("Session not found: $sessionId"))
+            
+            dao.updateSession(
+                session.copy(
+                    isSyncedToHealthConnect = false,
+                    syncErrorMessage = errorMessage,
+                    lastSyncAttemptTime = Instant.now()
+                )
             )
-        )
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

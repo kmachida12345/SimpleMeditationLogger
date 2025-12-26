@@ -54,7 +54,7 @@ class MeditationSessionRepositoryImplTest {
     }
     
     @Test
-    fun `markAsSynced updates session with sync info`() = runTest {
+    fun `markAsSynced updates session successfully`() = runTest {
         // Given
         val sessionId = 1
         val recordId = "health_connect_123"
@@ -62,9 +62,10 @@ class MeditationSessionRepositoryImplTest {
         coEvery { dao.getSessionById(sessionId) } returns session
         
         // When
-        repository.markAsSynced(sessionId, recordId)
+        val result = repository.markAsSynced(sessionId, recordId)
         
         // Then
+        assertTrue(result.isSuccess)
         coVerify {
             dao.updateSession(match {
                 it.id == sessionId &&
@@ -76,6 +77,20 @@ class MeditationSessionRepositoryImplTest {
     }
     
     @Test
+    fun `markAsSynced fails when session not found`() = runTest {
+        // Given
+        val sessionId = 999
+        coEvery { dao.getSessionById(sessionId) } returns null
+        
+        // When
+        val result = repository.markAsSynced(sessionId, "record_id")
+        
+        // Then
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
+    }
+    
+    @Test
     fun `markSyncFailed updates session with error`() = runTest {
         // Given
         val sessionId = 1
@@ -84,9 +99,10 @@ class MeditationSessionRepositoryImplTest {
         coEvery { dao.getSessionById(sessionId) } returns session
         
         // When
-        repository.markSyncFailed(sessionId, errorMessage)
+        val result = repository.markSyncFailed(sessionId, errorMessage)
         
         // Then
+        assertTrue(result.isSuccess)
         coVerify {
             dao.updateSession(match {
                 it.id == sessionId &&

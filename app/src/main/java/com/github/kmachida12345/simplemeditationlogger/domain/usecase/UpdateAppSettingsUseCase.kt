@@ -1,6 +1,7 @@
 package com.github.kmachida12345.simplemeditationlogger.domain.usecase
 
 import com.github.kmachida12345.simplemeditationlogger.data.repository.AppSettingsRepository
+import com.github.kmachida12345.simplemeditationlogger.domain.model.MeditationConstants
 import javax.inject.Inject
 
 class UpdateAppSettingsUseCase @Inject constructor(
@@ -8,8 +9,12 @@ class UpdateAppSettingsUseCase @Inject constructor(
 ) {
     suspend fun updateDefaultMeditationMinutes(minutes: Int): Result<Unit> {
         return try {
-            require(minutes > 0) { "Duration must be positive" }
-            require(minutes <= 180) { "Duration must be 180 minutes or less" }
+            require(minutes >= MeditationConstants.MIN_MEDITATION_MINUTES) { 
+                "Duration must be at least ${MeditationConstants.MIN_MEDITATION_MINUTES} minute" 
+            }
+            require(minutes <= MeditationConstants.MAX_MEDITATION_MINUTES) { 
+                "Duration must be ${MeditationConstants.MAX_MEDITATION_MINUTES} minutes or less" 
+            }
             
             repository.updateDefaultMeditationMinutes(minutes)
             Result.success(Unit)

@@ -13,9 +13,9 @@ class EndMeditationSessionUseCase @Inject constructor(
     suspend operator fun invoke(
         startTime: Instant,
         actualEndTime: Instant = Instant.now()
-    ): Result<Long> {
+    ): Result<MeditationSession> {
         return try {
-            require(actualEndTime >= startTime) { "End time must be after start time" }
+            require(actualEndTime >= startTime) { "End time must be after or equal to start time" }
             
             val session = MeditationSession(
                 startTime = startTime,
@@ -24,14 +24,15 @@ class EndMeditationSessionUseCase @Inject constructor(
             )
             
             val sessionId = sessionRepository.insertSession(session)
+            val savedSession = session.copy(id = sessionId.toInt())
             
             // ヘルスコネクト連携が有効なら同期を試みる（将来的にはWorkerで非同期実行）
             val settings = settingsRepository.getSettingsSync()
             if (settings?.isHealthConnectEnabled == true) {
-                // TODO: バックグラウンドで同期処理をトリガー
+                // TODO: バックグラウンドで同期処理をトリガー（WorkManager）
             }
             
-            Result.success(sessionId)
+            Result.success(savedSession)
         } catch (e: Exception) {
             Result.failure(e)
         }

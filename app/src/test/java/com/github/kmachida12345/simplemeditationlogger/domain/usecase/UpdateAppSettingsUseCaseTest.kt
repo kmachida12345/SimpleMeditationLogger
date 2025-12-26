@@ -1,7 +1,7 @@
 package com.github.kmachida12345.simplemeditationlogger.domain.usecase
 
 import com.github.kmachida12345.simplemeditationlogger.data.repository.AppSettingsRepository
-import io.mockk.coEvery
+import com.github.kmachida12345.simplemeditationlogger.domain.model.MeditationConstants
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -36,7 +36,9 @@ class UpdateAppSettingsUseCaseTest {
     @Test
     fun `updateDefaultMeditationMinutes with too large value fails`() = runTest {
         // When
-        val result = useCase.updateDefaultMeditationMinutes(200)
+        val result = useCase.updateDefaultMeditationMinutes(
+            MeditationConstants.MAX_MEDITATION_MINUTES + 1
+        )
         
         // Then
         assertTrue(result.isFailure)

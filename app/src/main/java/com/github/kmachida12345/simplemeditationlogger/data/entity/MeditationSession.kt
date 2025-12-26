@@ -20,15 +20,11 @@ data class MeditationSession(
     val healthConnectRecordId: String? = null,
     val syncErrorMessage: String? = null,
     val lastSyncAttemptTime: Instant? = null
-) {
-    init {
-        require(endTime >= startTime) { "endTime must be after or equal to startTime" }
-    }
-}
+)
 
 val MeditationSession.durationMinutes: Int
     get() = ChronoUnit.MINUTES.between(startTime, endTime).toInt()
 
-fun MeditationSession.getLocalDate(zoneId: ZoneId = ZoneId.systemDefault()): String {
-    return startTime.atZone(zoneId).toLocalDate().toString()
+fun MeditationSession.getLocalDate(zoneId: ZoneId = ZoneId.systemDefault()): java.time.LocalDate {
+    return startTime.atZone(zoneId).toLocalDate()
 }
