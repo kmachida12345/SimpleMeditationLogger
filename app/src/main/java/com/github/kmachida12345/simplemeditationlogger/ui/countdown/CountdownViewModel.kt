@@ -89,20 +89,20 @@ class CountdownViewModel @Inject constructor(
             
             endMeditationSessionUseCase(start, end)
                 .onSuccess { savedSession ->
-                    // 実際の経過時間（分）を計算
-                    val actualDurationMinutes = ((end.epochSecond - start.epochSecond) / 60).toInt()
+                    // 実際の経過時間（秒）を計算
+                    val actualDurationSeconds = end.epochSecond - start.epochSecond
                     _uiState.value = _uiState.value.copy(
                         isCompleted = true,
-                        actualDurationMinutes = actualDurationMinutes
+                        actualDurationSeconds = actualDurationSeconds
                     )
                 }
                 .onFailure { error ->
                     // エラー時も完了扱いにするが、ログは記録
                     android.util.Log.e("CountdownViewModel", "Failed to save session", error)
-                    val actualDurationMinutes = ((end.epochSecond - start.epochSecond) / 60).toInt()
+                    val actualDurationSeconds = end.epochSecond - start.epochSecond
                     _uiState.value = _uiState.value.copy(
                         isCompleted = true,
-                        actualDurationMinutes = actualDurationMinutes,
+                        actualDurationSeconds = actualDurationSeconds,
                         error = "Failed to save session"
                     )
                 }
@@ -119,6 +119,6 @@ data class CountdownUiState(
     val remainingSeconds: Int = 0,
     val isPaused: Boolean = false,
     val isCompleted: Boolean = false,
-    val actualDurationMinutes: Int = 0,
+    val actualDurationSeconds: Long = 0,
     val error: String? = null
 )

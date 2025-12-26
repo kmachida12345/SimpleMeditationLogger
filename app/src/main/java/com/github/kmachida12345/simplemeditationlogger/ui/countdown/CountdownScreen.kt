@@ -31,14 +31,14 @@ import java.util.Locale
 @Composable
 fun CountdownScreen(
     onBack: () -> Unit,
-    onComplete: (Int) -> Unit,
+    onComplete: (Long) -> Unit,
     viewModel: CountdownViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
     // 完了時の遷移
     if (uiState.isCompleted) {
-        onComplete(uiState.actualDurationMinutes)
+        onComplete(uiState.actualDurationSeconds)
     }
     
     Scaffold(

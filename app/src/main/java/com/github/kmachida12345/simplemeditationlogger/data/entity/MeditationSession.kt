@@ -22,8 +22,18 @@ data class MeditationSession(
     val lastSyncAttemptTime: Instant? = null
 )
 
+val MeditationSession.durationSeconds: Long
+    get() = ChronoUnit.SECONDS.between(startTime, endTime)
+
 val MeditationSession.durationMinutes: Int
     get() = ChronoUnit.MINUTES.between(startTime, endTime).toInt()
+
+fun MeditationSession.durationFormatted(): String {
+    val totalSeconds = durationSeconds
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return String.format("%d:%02d", minutes, seconds)
+}
 
 fun MeditationSession.getLocalDate(zoneId: ZoneId = ZoneId.systemDefault()): java.time.LocalDate {
     return startTime.atZone(zoneId).toLocalDate()

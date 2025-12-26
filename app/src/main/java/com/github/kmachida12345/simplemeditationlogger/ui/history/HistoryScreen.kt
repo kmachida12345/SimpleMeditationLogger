@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.kmachida12345.simplemeditationlogger.R
 import com.github.kmachida12345.simplemeditationlogger.data.entity.MeditationSession
-import com.github.kmachida12345.simplemeditationlogger.data.entity.durationMinutes
+import com.github.kmachida12345.simplemeditationlogger.data.entity.durationFormatted
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Dimensions
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
 import java.time.ZoneId
@@ -155,24 +155,12 @@ private fun HistoryItem(session: MeditationSession) {
             color = MaterialTheme.colorScheme.onBackground
         )
         
-        Row(
-            verticalAlignment = Alignment.Bottom
-        ) {
-            Text(
-                text = session.durationMinutes.toString(),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Primary
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = stringResource(R.string.history_minutes),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Gray,
-                modifier = Modifier.padding(bottom = 2.dp)
-            )
-        }
+        Text(
+            text = session.durationFormatted(),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Primary
+        )
     }
 }
 

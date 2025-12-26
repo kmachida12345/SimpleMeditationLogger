@@ -22,7 +22,7 @@ import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
 
 @Composable
 fun CompleteScreen(
-    durationMinutes: Int,
+    durationSeconds: Long,
     isHealthConnectSynced: Boolean = true,
     onBackToHome: () -> Unit
 ) {
@@ -72,7 +72,7 @@ fun CompleteScreen(
                 
                 // Duration Display
                 Text(
-                    text = formatDuration(durationMinutes),
+                    text = formatDuration(durationSeconds),
                     fontSize = 96.sp,
                     fontWeight = FontWeight.Bold,
                     color = Primary,
@@ -147,14 +147,9 @@ fun CompleteScreen(
     }
 }
 
-private fun formatDuration(durationMinutes: Int): String {
-    // 分単位で表示（秒は切り捨て）
-    val hours = durationMinutes / 60
-    val minutes = durationMinutes % 60
+private fun formatDuration(durationSeconds: Long): String {
+    val minutes = durationSeconds / 60
+    val seconds = durationSeconds % 60
     
-    return if (hours > 0) {
-        "%d:%02d".format(hours, minutes)
-    } else {
-        "%d:00".format(minutes)
-    }
+    return "%d:%02d".format(minutes, seconds)
 }

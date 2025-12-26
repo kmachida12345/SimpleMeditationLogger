@@ -13,5 +13,5 @@ sealed interface Screen {
     data class Countdown(val durationMinutes: Int) : Screen
     
     @Serializable
-    data class Complete(val durationMinutes: Int) : Screen
+    data class Complete(val durationSeconds: Long) : Screen
 }

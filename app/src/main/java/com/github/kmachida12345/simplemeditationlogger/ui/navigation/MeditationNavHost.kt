@@ -72,8 +72,8 @@ fun MeditationNavHost(
                     onBack = {
                         navController.popBackStack()
                     },
-                    onComplete = { actualDurationMinutes ->
-                        navController.navigate(Screen.Complete(actualDurationMinutes)) {
+                    onComplete = { actualDurationSeconds ->
+                        navController.navigate(Screen.Complete(actualDurationSeconds)) {
                             popUpTo<Screen.Countdown> { inclusive = true }
                         }
                     }
@@ -83,7 +83,7 @@ fun MeditationNavHost(
             composable<Screen.Complete> { backStackEntry ->
                 val complete = backStackEntry.toRoute<Screen.Complete>()
                 CompleteScreen(
-                    durationMinutes = complete.durationMinutes,
+                    durationSeconds = complete.durationSeconds,
                     isHealthConnectSynced = true,
                     onBackToHome = {
                         navController.navigate(Screen.Home) {
