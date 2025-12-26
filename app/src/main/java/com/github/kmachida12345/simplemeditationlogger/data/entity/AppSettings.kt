@@ -7,6 +7,6 @@ import androidx.room.PrimaryKey
 data class AppSettings(
     @PrimaryKey
     val id: Int = 1,
-    val defaultMeditationMinutes: Int = 15,
+    val defaultMeditationMinutes: Int = 3,
     val isHealthConnectEnabled: Boolean = false
 )
