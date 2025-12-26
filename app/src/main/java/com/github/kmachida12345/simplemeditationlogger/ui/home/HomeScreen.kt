@@ -37,7 +37,48 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = 8.dp
+            ) {
+                NavigationBarItem(
+                    icon = { 
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = stringResource(R.string.home_title),
+                            modifier = Modifier.size(26.dp)
+                        ) 
+                    },
+                    label = { 
+                        Text(
+                            text = stringResource(R.string.home_title),
+                            fontSize = 10.sp
+                        ) 
+                    },
+                    selected = true,
+                    onClick = { }
+                )
+                NavigationBarItem(
+                    icon = { 
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = stringResource(R.string.history_title),
+                            modifier = Modifier.size(26.dp)
+                        ) 
+                    },
+                    label = { 
+                        Text(
+                            text = stringResource(R.string.history_title),
+                            fontSize = 10.sp
+                        ) 
+                    },
+                    selected = false,
+                    onClick = onNavigateToHistory
+                )
+            }
+        }
     ) { padding ->
         Box(
             modifier = Modifier
@@ -167,66 +208,6 @@ fun HomeScreen(
                                     text = stringResource(R.string.home_health_connect).uppercase(),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = SlateBlue400
-                                )
-                            }
-                        }
-                    }
-                }
-                
-                // Bottom Navigation
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.surface,
-                    shadowElevation = 8.dp
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(64.dp)
-                            .padding(horizontal = 40.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // ホームボタン
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "ホーム",
-                                tint = Primary,
-                                modifier = Modifier.size(26.dp)
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = stringResource(R.string.home_title),
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Primary
-                            )
-                        }
-                        
-                        // 履歴ボタン
-                        IconButton(
-                            onClick = onNavigateToHistory,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Favorite,
-                                    contentDescription = stringResource(R.string.history_title),
-                                    tint = SlateBlue400,
-                                    modifier = Modifier.size(26.dp)
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = stringResource(R.string.history_title),
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Medium,
                                     color = SlateBlue400
                                 )
                             }
