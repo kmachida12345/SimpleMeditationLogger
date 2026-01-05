@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.github.kmachida12345.simplemeditationlogger"
-        minSdk = 28
+        minSdk = 34
         targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
@@ -79,6 +79,9 @@ dependencies {
     
     // OSS Licenses
     implementation(libs.play.services.oss.licenses)
+    
+    // Health Connect
+    implementation(libs.androidx.health.connect)
     
     // Testing
     testImplementation(libs.junit)

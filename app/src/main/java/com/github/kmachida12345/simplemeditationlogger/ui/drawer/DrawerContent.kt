@@ -1,7 +1,7 @@
 package com.github.kmachida12345.simplemeditationlogger.ui.drawer
 
 import android.content.Intent
-import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -30,10 +31,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.kmachida12345.simplemeditationlogger.BuildConfig
 import com.github.kmachida12345.simplemeditationlogger.R
+import com.github.kmachida12345.simplemeditationlogger.data.healthconnect.HealthConnectManager
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Dimensions
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import java.util.Locale
+import androidx.core.net.toUri
 
 @Composable
 fun DrawerContent(
@@ -42,6 +45,28 @@ fun DrawerContent(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val healthConnectManager = remember { 
+        HealthConnectManager(context)
+    }
+    
+    // Health Connect パーミッションリクエスト用のランチャー
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = healthConnectManager.createPermissionRequestContract()
+    ) { granted ->
+        if (granted.containsAll(healthConnectManager.PERMISSIONS)) {
+            viewModel.onPermissionGranted()
+        } else {
+            viewModel.onPermissionDenied()
+        }
+    }
+    
+    // パーミッションリクエストが必要な場合
+    LaunchedEffect(uiState.shouldRequestHealthConnectPermission) {
+        if (uiState.shouldRequestHealthConnectPermission) {
+            permissionLauncher.launch(healthConnectManager.PERMISSIONS)
+            viewModel.onPermissionRequestHandled()
+        }
+    }
     
     // Time Picker Dialog
     if (uiState.showTimePickerDialog) {
@@ -140,7 +165,8 @@ fun DrawerContent(
                 title = stringResource(R.string.drawer_privacy),
                 onClick = {
                     val intent = Intent(Intent.ACTION_VIEW).apply {
-                        data = Uri.parse("https://kmachida12345.github.io/SimpleMeditationLogger/privacy_policy.html")
+                        data =
+                            "https://kmachida12345.github.io/SimpleMeditationLogger/privacy_policy.html".toUri()
                     }
                     context.startActivity(intent)
                 }
