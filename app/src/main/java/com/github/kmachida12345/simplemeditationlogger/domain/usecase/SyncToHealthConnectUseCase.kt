@@ -1,6 +1,7 @@
 package com.github.kmachida12345.simplemeditationlogger.domain.usecase
 
 import com.github.kmachida12345.simplemeditationlogger.data.entity.MeditationSession
+import com.github.kmachida12345.simplemeditationlogger.data.healthconnect.HealthConnectManager
 import com.github.kmachida12345.simplemeditationlogger.data.repository.MeditationSessionRepository
 import com.github.kmachida12345.simplemeditationlogger.domain.model.MeditationConstants
 import kotlinx.coroutines.async
@@ -9,31 +10,36 @@ import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 class SyncToHealthConnectUseCase @Inject constructor(
-    private val repository: MeditationSessionRepository
+    private val repository: MeditationSessionRepository,
+    private val healthConnectManager: HealthConnectManager
 ) {
     suspend operator fun invoke(session: MeditationSession): Result<Unit> {
         if (session.isSyncedToHealthConnect) {
             return Result.success(Unit)
         }
         
-        // TODO: Health Connect SDK統合時に実装
-        // モック: 実際にはHealth Connect APIを呼ぶ
-        val mockHealthConnectRecordId = "mock_${session.id}_${System.currentTimeMillis()}"
-        
-        val syncResult = repository.markAsSynced(
-            sessionId = session.id,
-            healthConnectRecordId = mockHealthConnectRecordId
+        val writeResult = healthConnectManager.writeMeditationSession(
+            startTime = session.startTime,
+            endTime = session.endTime
         )
         
-        return syncResult.onFailure { exception ->
-            // markSyncFailed自体が失敗しても例外を投げない（ログのみ）
-            runCatching {
-                repository.markSyncFailed(
+        return writeResult.fold(
+            onSuccess = { recordId ->
+                repository.markAsSynced(
                     sessionId = session.id,
-                    errorMessage = exception.message ?: "Unknown error"
+                    healthConnectRecordId = recordId
                 )
+            },
+            onFailure = { exception ->
+                runCatching {
+                    repository.markSyncFailed(
+                        sessionId = session.id,
+                        errorMessage = exception.message ?: "Unknown error"
+                    )
+                }
+                Result.failure(exception)
             }
-        }
+        )
     }
     
     suspend fun syncAllUnsynced(

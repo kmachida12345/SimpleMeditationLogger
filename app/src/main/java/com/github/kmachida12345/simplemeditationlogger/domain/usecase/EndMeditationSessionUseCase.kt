@@ -9,7 +9,8 @@ import javax.inject.Inject
 
 class EndMeditationSessionUseCase @Inject constructor(
     private val sessionRepository: MeditationSessionRepository,
-    private val settingsRepository: AppSettingsRepository
+    private val settingsRepository: AppSettingsRepository,
+    private val syncToHealthConnectUseCase: SyncToHealthConnectUseCase
 ) {
     suspend operator fun invoke(
         startTime: Instant,
@@ -27,10 +28,9 @@ class EndMeditationSessionUseCase @Inject constructor(
             val sessionId = sessionRepository.insertSession(session)
             val savedSession = session.copy(id = sessionId.toInt())
             
-            // ヘルスコネクト連携が有効なら同期を試みる（将来的にはWorkerで非同期実行）
             val healthConnectEnabled = settingsRepository.getHealthConnectEnabled().first()
             if (healthConnectEnabled) {
-                // TODO: バックグラウンドで同期処理をトリガー（WorkManager）
+                syncToHealthConnectUseCase(savedSession)
             }
             
             Result.success(savedSession)
