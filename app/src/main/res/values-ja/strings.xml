@@ -12,6 +12,8 @@
     <!-- History Screen -->
     <string name="history_title">履歴</string>
     <string name="history_minutes">分</string>
+    <string name="history_empty_title">まだ瞑想の履歴がありません</string>
+    <string name="history_empty_subtitle">最初のセッションを始めましょう！</string>
     
     <!-- Countdown Screen -->
     <string name="countdown_title">瞑想</string>
@@ -19,16 +21,24 @@
     <string name="countdown_pause">一時停止</string>
     <string name="countdown_resume">再開</string>
     <string name="countdown_end">終了</string>
-    
+    <string name="countdown_exit_title">瞑想を終了しますか？</string>
+    <string name="countdown_exit_message">このセッションは保存されません。</string>
+    <string name="countdown_exit_confirm">終了する</string>
+
     <!-- Complete Screen -->
     <string name="complete_title">お疲れ様でした</string>
     <string name="complete_health_saved">ヘルスケアに記録しました</string>
+    <string name="complete_health_sync_failed">ヘルスコネクトへの記録に失敗しました</string>
+    <string name="complete_save_failed">セッションの保存に失敗しました</string>
     <string name="complete_back_home">ホームに戻る</string>
     
     <!-- Drawer Menu -->
+    <string name="drawer_title">Meditation</string>
     <string name="drawer_settings">設定</string>
     <string name="drawer_default_time">デフォルト時間</string>
     <string name="drawer_health_connect">ヘルスコネクト</string>
+    <string name="drawer_health_connect_unavailable">この端末ではヘルスコネクトを利用できません</string>
+    <string name="drawer_permission_denied">ヘルスコネクトの権限が許可されませんでした</string>
     <string name="drawer_support">サポート</string>
     <string name="drawer_about">アプリについて</string>
     <string name="drawer_privacy">プライバシーポリシー</string>

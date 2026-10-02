@@ -1,105 +1,74 @@
 package com.github.kmachida12345.simplemeditationlogger.data.repository
 
 import app.cash.turbine.test
-import com.github.kmachida12345.simplemeditationlogger.data.dao.AppSettingsDao
-import com.github.kmachida12345.simplemeditationlogger.data.entity.AppSettings
-import io.mockk.coEvery
+import com.github.kmachida12345.simplemeditationlogger.data.datastore.AppSettingsDataStore
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
-import org.junit.Before
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 
 class AppSettingsRepositoryImplTest {
-    
-    private lateinit var dao: AppSettingsDao
-    private lateinit var repository: AppSettingsRepositoryImpl
-    
-    @Before
-    fun setup() {
-        dao = mockk(relaxed = true)
-        repository = AppSettingsRepositoryImpl(dao)
-    }
-    
+
+    private val dataStore = mockk<AppSettingsDataStore>(relaxed = true)
+    private val repository = AppSettingsRepositoryImpl(dataStore)
+
     @Test
-    fun `getSettings returns flow from dao`() = runTest {
+    fun `getDefaultDurationSeconds passes through datastore flow`() = runTest {
         // Given
-        val settings = AppSettings(defaultMeditationMinutes = 20)
-        every { dao.getSettings() } returns flowOf(settings)
-        
+        every { dataStore.defaultDurationSeconds } returns flowOf(300)
+
         // When & Then
-        repository.getSettings().test {
-            assertEquals(settings, awaitItem())
+        repository.getDefaultDurationSeconds().test {
+            assertEquals(300, awaitItem())
             awaitComplete()
         }
     }
-    
+
     @Test
-    fun `updateDefaultMeditationMinutes updates only that field`() = runTest {
+    fun `getHealthConnectEnabled passes through datastore flow`() = runTest {
         // Given
-        val existingSettings = AppSettings(
-            defaultMeditationMinutes = 15,
-            isHealthConnectEnabled = true
-        )
-        coEvery { dao.getSettingsSync() } returns existingSettings
-        
-        // When
-        repository.updateDefaultMeditationMinutes(30)
-        
-        // Then
-        coVerify {
-            dao.updateSettings(match {
-                it.defaultMeditationMinutes == 30 &&
-                it.isHealthConnectEnabled == true
-            })
+        every { dataStore.healthConnectEnabled } returns flowOf(true)
+
+        // When & Then
+        repository.getHealthConnectEnabled().test {
+            assertEquals(true, awaitItem())
+            awaitComplete()
         }
     }
-    
+
     @Test
-    fun `updateHealthConnectEnabled updates only that field`() = runTest {
-        // Given
-        val existingSettings = AppSettings(
-            defaultMeditationMinutes = 15,
-            isHealthConnectEnabled = false
-        )
-        coEvery { dao.getSettingsSync() } returns existingSettings
-        
+    fun `updateDefaultDurationSeconds forwards to datastore`() = runTest {
+        // When
+        repository.updateDefaultDurationSeconds(600)
+
+        // Then
+        coVerify(exactly = 1) { dataStore.updateDefaultDurationSeconds(600) }
+    }
+
+    @Test
+    fun `updateDefaultDurationSeconds rejects non-positive values`() = runTest {
+        // When
+        try {
+            repository.updateDefaultDurationSeconds(0)
+            fail("Expected IllegalArgumentException")
+        } catch (e: IllegalArgumentException) {
+            // Then
+            assertTrue(e.message!!.contains("positive"))
+        }
+        coVerify(exactly = 0) { dataStore.updateDefaultDurationSeconds(any()) }
+    }
+
+    @Test
+    fun `updateHealthConnectEnabled forwards to datastore`() = runTest {
         // When
         repository.updateHealthConnectEnabled(true)
-        
+
         // Then
-        coVerify {
-            dao.updateSettings(match {
-                it.defaultMeditationMinutes == 15 &&
-                it.isHealthConnectEnabled == true
-            })
-        }
-    }
-    
-    @Test
-    fun `initializeDefaultSettings inserts when not exists`() = runTest {
-        // Given
-        coEvery { dao.getSettingsSync() } returns null
-        
-        // When
-        repository.initializeDefaultSettings()
-        
-        // Then
-        coVerify { dao.insertSettings(any()) }
-    }
-    
-    @Test
-    fun `initializeDefaultSettings does nothing when already exists`() = runTest {
-        // Given
-        coEvery { dao.getSettingsSync() } returns AppSettings()
-        
-        // When
-        repository.initializeDefaultSettings()
-        
-        // Then
-        coVerify(exactly = 0) { dao.insertSettings(any()) }
+        coVerify(exactly = 1) { dataStore.updateHealthConnectEnabled(true) }
     }
 }

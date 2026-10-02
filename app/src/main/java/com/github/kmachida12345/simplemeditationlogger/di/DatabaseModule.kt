@@ -2,8 +2,6 @@ package com.github.kmachida12345.simplemeditationlogger.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.github.kmachida12345.simplemeditationlogger.data.dao.MeditationSessionDao
 import com.github.kmachida12345.simplemeditationlogger.data.database.MeditationDatabase
 import dagger.Module
@@ -22,12 +20,12 @@ object DatabaseModule {
     fun provideMeditationDatabase(
         @ApplicationContext context: Context
     ): MeditationDatabase {
+        // スキーマ変更時は明示的なMigrationを必ず定義すること(破壊的フォールバックは使わない)
         return Room.databaseBuilder(
             context,
             MeditationDatabase::class.java,
             "meditation_database"
         )
-            .fallbackToDestructiveMigration()
             .build()
     }
     

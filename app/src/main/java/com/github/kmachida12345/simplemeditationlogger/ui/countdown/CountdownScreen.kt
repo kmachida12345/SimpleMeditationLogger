@@ -1,5 +1,8 @@
 package com.github.kmachida12345.simplemeditationlogger.ui.countdown
 
+import android.view.WindowManager
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -13,8 +16,13 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -25,22 +33,61 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.kmachida12345.simplemeditationlogger.R
+import com.github.kmachida12345.simplemeditationlogger.domain.model.HealthConnectSyncStatus
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
+import com.github.kmachida12345.simplemeditationlogger.ui.util.formatMinutesSeconds
 import java.util.Locale
 
 @Composable
 fun CountdownScreen(
     onBack: () -> Unit,
-    onComplete: (Long) -> Unit,
+    onComplete: (durationSeconds: Int, syncStatus: HealthConnectSyncStatus, sessionSaved: Boolean) -> Unit,
     viewModel: CountdownViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
-    // 完了時の遷移
-    if (uiState.isCompleted) {
-        onComplete(uiState.actualDurationSeconds)
+
+    // 完了時の遷移(再コンポーズでの多重発火を防ぐためLaunchedEffectで一度だけ)
+    LaunchedEffect(uiState.isCompleted) {
+        if (uiState.isCompleted) {
+            onComplete(uiState.actualDurationSeconds, uiState.syncStatus, uiState.sessionSaved)
+        }
     }
-    
+
+    // 瞑想中は画面を消灯させない
+    val activity = LocalActivity.current
+    DisposableEffect(Unit) {
+        activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        onDispose {
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
+    // 誤操作でセッションを破棄しないよう、戻る操作は確認ダイアログを挟む
+    var showExitDialog by rememberSaveable { mutableStateOf(false) }
+    BackHandler(enabled = !uiState.isCompleted) {
+        showExitDialog = true
+    }
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = { Text(stringResource(R.string.countdown_exit_title)) },
+            text = { Text(stringResource(R.string.countdown_exit_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showExitDialog = false
+                    onBack()
+                }) {
+                    Text(stringResource(R.string.countdown_exit_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
@@ -57,7 +104,7 @@ fun CountdownScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onBack) {
+                IconButton(onClick = { showExitDialog = true }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.close)
@@ -92,7 +139,7 @@ fun CountdownScreen(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = formatTime(uiState.remainingSeconds),
+                                text = formatMinutesSeconds(uiState.remainingSeconds),
                                 fontSize = 88.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Primary,
@@ -208,10 +255,4 @@ private fun RippleEffect() {
                 .border(1.dp, Primary.copy(alpha = alpha), CircleShape)
         )
     }
-}
-
-private fun formatTime(seconds: Int): String {
-    val minutes = seconds / 60
-    val secs = seconds % 60
-    return "%d:%02d".format(minutes, secs)
 }

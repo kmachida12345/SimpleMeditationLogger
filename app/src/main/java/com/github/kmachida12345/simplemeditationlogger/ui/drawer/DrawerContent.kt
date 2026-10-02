@@ -31,9 +31,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.kmachida12345.simplemeditationlogger.BuildConfig
 import com.github.kmachida12345.simplemeditationlogger.R
-import com.github.kmachida12345.simplemeditationlogger.data.healthconnect.HealthConnectManager
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Dimensions
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
+import com.github.kmachida12345.simplemeditationlogger.ui.util.formatMinutesWithSuffixOrMinutesSeconds
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import java.util.Locale
 import androidx.core.net.toUri
@@ -45,29 +45,36 @@ fun DrawerContent(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    val healthConnectManager = remember { 
-        HealthConnectManager(context)
-    }
-    
+
     // Health Connect パーミッションリクエスト用のランチャー
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = healthConnectManager.createPermissionRequestContract()
+        contract = remember { viewModel.createPermissionRequestContract() }
     ) { granted ->
-        if (granted.containsAll(healthConnectManager.PERMISSIONS)) {
+        if (granted.containsAll(viewModel.healthConnectPermissions)) {
             viewModel.onPermissionGranted()
         } else {
             viewModel.onPermissionDenied()
         }
     }
-    
+
     // パーミッションリクエストが必要な場合
     LaunchedEffect(uiState.shouldRequestHealthConnectPermission) {
         if (uiState.shouldRequestHealthConnectPermission) {
-            permissionLauncher.launch(healthConnectManager.PERMISSIONS)
+            permissionLauncher.launch(viewModel.healthConnectPermissions)
             viewModel.onPermissionRequestHandled()
         }
     }
-    
+
+    // パーミッション拒否をスナックバーで通知する
+    val snackbarHostState = remember { SnackbarHostState() }
+    val permissionDeniedMessage = stringResource(R.string.drawer_permission_denied)
+    LaunchedEffect(uiState.showPermissionDeniedMessage) {
+        if (uiState.showPermissionDeniedMessage) {
+            snackbarHostState.showSnackbar(permissionDeniedMessage)
+            viewModel.onPermissionDeniedMessageShown()
+        }
+    }
+
     // Time Picker Dialog
     if (uiState.showTimePickerDialog) {
         TimePickerDialog(
@@ -81,6 +88,7 @@ fun DrawerContent(
         modifier = Modifier.width(320.dp),
         drawerContainerColor = MaterialTheme.colorScheme.surface
     ) {
+      Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -114,7 +122,7 @@ fun DrawerContent(
                         }
                     }
                     Text(
-                        text = "Meditation",
+                        text = stringResource(R.string.drawer_title),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -135,15 +143,21 @@ fun DrawerContent(
             DrawerMenuItem(
                 icon = Icons.Default.Timer,
                 title = stringResource(R.string.drawer_default_time),
-                subtitle = formatDurationDisplay(uiState.defaultMeditationSeconds),
+                subtitle = formatMinutesWithSuffixOrMinutesSeconds(uiState.defaultMeditationSeconds),
                 onClick = { viewModel.onDefaultTimeClick() }
             )
-            
+
             DrawerMenuItemWithSwitch(
                 icon = Icons.Default.Favorite,
                 title = stringResource(R.string.drawer_health_connect),
                 checked = uiState.isHealthConnectEnabled,
-                onCheckedChange = { viewModel.onHealthConnectToggle(it) }
+                onCheckedChange = { viewModel.onHealthConnectToggle(it) },
+                enabled = uiState.isHealthConnectAvailable,
+                subtitle = if (uiState.isHealthConnectAvailable) {
+                    null
+                } else {
+                    stringResource(R.string.drawer_health_connect_unavailable)
+                }
             )
             
             Spacer(modifier = Modifier.height(Dimensions.Spacing.Small))
@@ -193,6 +207,12 @@ fun DrawerContent(
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+      }
     }
 }
 
@@ -281,7 +301,9 @@ private fun DrawerMenuItemWithSwitch(
     icon: ImageVector,
     title: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+    subtitle: String? = null
 ) {
     Surface(
         modifier = Modifier
@@ -311,16 +333,25 @@ private fun DrawerMenuItemWithSwitch(
                 }
             }
             
-            Text(
-                text = title,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
-            )
-            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                if (subtitle != null) {
+                    Text(
+                        text = subtitle,
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
+                enabled = enabled,
                 modifier = Modifier.height(28.dp)
             )
         }
@@ -344,7 +375,7 @@ private fun TimePickerDialog(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "$selectedMinutes min",
+                    text = stringResource(R.string.duration_picker_label, selectedMinutes),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Primary
@@ -360,8 +391,16 @@ private fun TimePickerDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("1 min", fontSize = 12.sp, color = Color.Gray)
-                    Text("60 min", fontSize = 12.sp, color = Color.Gray)
+                    Text(
+                        text = stringResource(R.string.duration_picker_label, 1),
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = stringResource(R.string.duration_picker_label, 60),
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
                 }
             }
         },
@@ -376,14 +415,4 @@ private fun TimePickerDialog(
             }
         }
     )
-}
-
-private fun formatDurationDisplay(seconds: Int): String {
-    val minutes = seconds / 60
-    val remainingSeconds = seconds % 60
-    return if (remainingSeconds == 0) {
-        "$minutes min"
-    } else {
-        "$minutes:${remainingSeconds.toString().padStart(2, '0')}"
-    }
 }

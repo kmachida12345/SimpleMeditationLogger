@@ -1,131 +1,120 @@
 package com.github.kmachida12345.simplemeditationlogger.domain.usecase
 
 import com.github.kmachida12345.simplemeditationlogger.data.entity.MeditationSession
+import com.github.kmachida12345.simplemeditationlogger.data.healthconnect.HealthConnectManager
 import com.github.kmachida12345.simplemeditationlogger.data.repository.MeditationSessionRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import java.time.Instant
 
 class SyncToHealthConnectUseCaseTest {
-    
+
     private val repository = mockk<MeditationSessionRepository>(relaxed = true)
-    private val useCase = SyncToHealthConnectUseCase(repository)
-    
-    @Test
-    fun `invoke with unsynced session succeeds`() = runTest {
-        // Given
-        val session = createTestSession(1, isSynced = false)
+    private val healthConnectManager = mockk<HealthConnectManager>(relaxed = true)
+    private val useCase = SyncToHealthConnectUseCase(repository, healthConnectManager)
+
+    @Before
+    fun setup() {
         coEvery { repository.markAsSynced(any(), any()) } returns Result.success(Unit)
-        
-        // When
-        val result = useCase(session)
-        
-        // Then
-        assertTrue(result.isSuccess)
-        coVerify(exactly = 1) { repository.markAsSynced(1, any()) }
-    }
-    
-    @Test
-    fun `invoke with already synced session returns success immediately`() = runTest {
-        // Given
-        val session = createTestSession(1, isSynced = true)
-        
-        // When
-        val result = useCase(session)
-        
-        // Then
-        assertTrue(result.isSuccess)
-        coVerify(exactly = 0) { repository.markAsSynced(any(), any()) }
-    }
-    
-    @Test
-    fun `invoke marks sync as failed when exception occurs`() = runTest {
-        // Given
-        val session = createTestSession(1, isSynced = false)
-        val error = RuntimeException("Network error")
-        coEvery { repository.markAsSynced(any(), any()) } returns Result.failure(error)
         coEvery { repository.markSyncFailed(any(), any()) } returns Result.success(Unit)
-        
+    }
+
+    @Test
+    fun `invoke skips already synced session`() = runTest {
+        // Given
+        val session = createTestSession(1).copy(isSyncedToHealthConnect = true)
+
         // When
         val result = useCase(session)
-        
+
+        // Then
+        assertTrue(result.isSuccess)
+        coVerify(exactly = 0) { healthConnectManager.writeMeditationSession(any(), any()) }
+    }
+
+    @Test
+    fun `invoke marks session synced with record id returned by health connect`() = runTest {
+        // Given
+        val session = createTestSession(1)
+        coEvery {
+            healthConnectManager.writeMeditationSession(session.startTime, session.endTime)
+        } returns Result.success("hc-record-id")
+
+        // When
+        val result = useCase(session)
+
+        // Then
+        assertTrue(result.isSuccess)
+        coVerify(exactly = 1) { repository.markAsSynced(1, "hc-record-id") }
+    }
+
+    @Test
+    fun `invoke marks sync failed and returns failure when write fails`() = runTest {
+        // Given
+        val session = createTestSession(1)
+        coEvery {
+            healthConnectManager.writeMeditationSession(any(), any())
+        } returns Result.failure(SecurityException("Missing permissions"))
+
+        // When
+        val result = useCase(session)
+
         // Then
         assertTrue(result.isFailure)
-        coVerify { repository.markSyncFailed(1, any()) }
+        coVerify(exactly = 1) { repository.markSyncFailed(1, "Missing permissions") }
+        coVerify(exactly = 0) { repository.markAsSynced(any(), any()) }
     }
-    
+
     @Test
-    fun `syncAllUnsynced processes all sessions in parallel`() = runTest {
-        // Given
-        val sessions = listOf(
-            createTestSession(1, isSynced = false),
-            createTestSession(2, isSynced = false),
-            createTestSession(3, isSynced = false)
-        )
-        coEvery { repository.getUnsyncedSessions(any()) } returns sessions
-        coEvery { repository.markAsSynced(any(), any()) } returns Result.success(Unit)
-        
-        // When
-        val result = useCase.syncAllUnsynced()
-        
-        // Then
-        assertTrue(result.isSuccess)
-        val syncResult = result.getOrThrow()
-        assertEquals(3, syncResult.successCount)
-        assertEquals(0, syncResult.failureCount)
-        assertEquals(3, syncResult.totalCount)
-    }
-    
-    @Test
-    fun `syncAllUnsynced handles partial failures`() = runTest {
-        // Given
-        val sessions = listOf(
-            createTestSession(1, isSynced = false),
-            createTestSession(2, isSynced = false),
-            createTestSession(3, isSynced = false)
-        )
-        coEvery { repository.getUnsyncedSessions(any()) } returns sessions
-        coEvery { repository.markAsSynced(1, any()) } returns Result.success(Unit)
-        coEvery { repository.markAsSynced(2, any()) } returns Result.failure(RuntimeException("Error"))
-        coEvery { repository.markAsSynced(3, any()) } returns Result.success(Unit)
-        coEvery { repository.markSyncFailed(any(), any()) } returns Result.success(Unit)
-        
-        // When
-        val result = useCase.syncAllUnsynced()
-        
-        // Then
-        assertTrue(result.isSuccess)
-        val syncResult = result.getOrThrow()
-        assertEquals(2, syncResult.successCount)
-        assertEquals(1, syncResult.failureCount)
-    }
-    
-    @Test
-    fun `syncAllUnsynced returns zero counts when no unsynced sessions`() = runTest {
+    fun `syncAllUnsynced returns zero counts when nothing to sync`() = runTest {
         // Given
         coEvery { repository.getUnsyncedSessions(any()) } returns emptyList()
-        
+
         // When
         val result = useCase.syncAllUnsynced()
-        
+
+        // Then
+        assertTrue(result.isSuccess)
+        assertEquals(0, result.getOrThrow().totalCount)
+    }
+
+    @Test
+    fun `syncAllUnsynced counts successes and failures`() = runTest {
+        // Given
+        val success = createTestSession(1)
+        val failure = createTestSession(2)
+        coEvery { repository.getUnsyncedSessions(any()) } returns listOf(success, failure)
+        coEvery {
+            healthConnectManager.writeMeditationSession(success.startTime, success.endTime)
+        } returns Result.success("hc-record-id")
+        coEvery {
+            healthConnectManager.writeMeditationSession(failure.startTime, failure.endTime)
+        } returns Result.failure(RuntimeException("write error"))
+
+        // When
+        val result = useCase.syncAllUnsynced()
+
         // Then
         assertTrue(result.isSuccess)
         val syncResult = result.getOrThrow()
-        assertEquals(0, syncResult.successCount)
-        assertEquals(0, syncResult.failureCount)
+        assertEquals(1, syncResult.successCount)
+        assertEquals(1, syncResult.failureCount)
+        assertEquals(2, syncResult.totalCount)
     }
-    
-    private fun createTestSession(id: Int, isSynced: Boolean): MeditationSession {
-        val now = Instant.now()
+
+    private fun createTestSession(id: Int): MeditationSession {
+        val start = Instant.parse("2026-01-01T00:00:00Z").plusSeconds(id * 3600L)
         return MeditationSession(
             id = id,
-            startTime = now.minusSeconds(900),
-            endTime = now,
-            isSyncedToHealthConnect = isSynced
+            startTime = start,
+            endTime = start.plusSeconds(600),
+            isSyncedToHealthConnect = false
         )
     }
 }

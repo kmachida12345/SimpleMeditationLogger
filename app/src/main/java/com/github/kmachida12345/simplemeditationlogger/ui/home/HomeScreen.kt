@@ -30,6 +30,7 @@ import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.SlateBlue100
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.SlateBlue400
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.SlateBlue800
+import com.github.kmachida12345.simplemeditationlogger.ui.util.formatMinutesOrMinutesSeconds
 import java.util.Locale
 
 @Composable
@@ -145,7 +146,7 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.height(Dimensions.Spacing.ExtraSmall))
                             Text(
-                                text = formatDurationForDisplay(uiState.defaultDurationSeconds),
+                                text = formatMinutesOrMinutesSeconds(uiState.defaultDurationSeconds),
                                 fontSize = Dimensions.FontSize.Timer,
                                 fontWeight = FontWeight.Light,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -221,15 +222,5 @@ fun HomeScreen(
                 }
             }
         }
-    }
-}
-
-private fun formatDurationForDisplay(seconds: Int): String {
-    val minutes = seconds / 60
-    val remainingSeconds = seconds % 60
-    return if (remainingSeconds == 0) {
-        "$minutes"
-    } else {
-        "$minutes:${remainingSeconds.toString().padStart(2, '0')}"
     }
 }

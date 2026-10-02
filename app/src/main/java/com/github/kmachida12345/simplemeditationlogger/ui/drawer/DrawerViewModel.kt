@@ -90,10 +90,20 @@ class DrawerViewModel @Inject constructor(
             updateHealthConnectEnabledUseCase(true)
         }
     }
-    
+
     fun onPermissionDenied() {
-        // パーミッションが拒否された場合は何もしない（トグルはOFFのまま）
+        // トグルはOFFのまま、拒否されたことをユーザーに通知する
+        _uiState.value = _uiState.value.copy(showPermissionDeniedMessage = true)
     }
+
+    fun onPermissionDeniedMessageShown() {
+        _uiState.value = _uiState.value.copy(showPermissionDeniedMessage = false)
+    }
+
+    val healthConnectPermissions: Set<String>
+        get() = healthConnectManager.PERMISSIONS
+
+    fun createPermissionRequestContract() = healthConnectManager.createPermissionRequestContract()
     
     fun onDismissTimePickerDialog() {
         _uiState.value = _uiState.value.copy(showTimePickerDialog = false)
@@ -114,5 +124,6 @@ data class DrawerUiState(
     val isHealthConnectEnabled: Boolean = false,
     val isHealthConnectAvailable: Boolean = false,
     val showTimePickerDialog: Boolean = false,
-    val shouldRequestHealthConnectPermission: Boolean = false
+    val shouldRequestHealthConnectPermission: Boolean = false,
+    val showPermissionDeniedMessage: Boolean = false
 )

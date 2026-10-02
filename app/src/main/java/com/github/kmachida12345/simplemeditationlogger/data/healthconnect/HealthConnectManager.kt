@@ -9,9 +9,10 @@ import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Instant
-import java.time.ZoneOffset
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.cancellation.CancellationException
 
 @Singleton
 class HealthConnectManager @Inject constructor(
@@ -34,6 +35,8 @@ class HealthConnectManager @Inject constructor(
         return try {
             val granted = healthConnectClient.permissionController.getGrantedPermissions()
             PERMISSIONS.all { it in granted }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             false
         }
@@ -55,13 +58,13 @@ class HealthConnectManager @Inject constructor(
                 return Result.failure(SecurityException("Missing Health Connect permissions"))
             }
 
-            val zoneOffset = ZoneOffset.systemDefault().rules.getOffset(startTime)
-            
+            val zoneRules = ZoneId.systemDefault().rules
+
             val mindfulnessSessionRecord = MindfulnessSessionRecord(
                 startTime = startTime,
-                startZoneOffset = zoneOffset,
+                startZoneOffset = zoneRules.getOffset(startTime),
                 endTime = endTime,
-                endZoneOffset = zoneOffset,
+                endZoneOffset = zoneRules.getOffset(endTime),
                 mindfulnessSessionType = MindfulnessSessionRecord.MINDFULNESS_SESSION_TYPE_MEDITATION,
                 title = null,
                 notes = null,
@@ -72,13 +75,15 @@ class HealthConnectManager @Inject constructor(
                 )
             )
             
-            healthConnectClient.insertRecords(
+            val response = healthConnectClient.insertRecords(
                 listOf(mindfulnessSessionRecord)
             )
-            
-            // Generate a record ID based on timestamp
-            val recordId = "${startTime.toEpochMilli()}_${endTime.toEpochMilli()}"
+
+            val recordId = response.recordIdsList.firstOrNull()
+                ?: return Result.failure(IllegalStateException("Health Connect returned no record ID"))
             Result.success(recordId)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }

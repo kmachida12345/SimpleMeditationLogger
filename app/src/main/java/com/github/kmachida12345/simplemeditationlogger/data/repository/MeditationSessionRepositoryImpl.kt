@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 class MeditationSessionRepositoryImpl @Inject constructor(
     private val dao: MeditationSessionDao
@@ -57,11 +58,13 @@ class MeditationSessionRepositoryImpl @Inject constructor(
                 )
             )
             Result.success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-    
+
     override suspend fun markSyncFailed(sessionId: Int, errorMessage: String): Result<Unit> {
         return try {
             val session = dao.getSessionById(sessionId)
@@ -75,6 +78,8 @@ class MeditationSessionRepositoryImpl @Inject constructor(
                 )
             )
             Result.success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }

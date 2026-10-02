@@ -8,6 +8,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 class SyncToHealthConnectUseCase @Inject constructor(
     private val repository: MeditationSessionRepository,
@@ -31,12 +32,10 @@ class SyncToHealthConnectUseCase @Inject constructor(
                 )
             },
             onFailure = { exception ->
-                runCatching {
-                    repository.markSyncFailed(
-                        sessionId = session.id,
-                        errorMessage = exception.message ?: "Unknown error"
-                    )
-                }
+                repository.markSyncFailed(
+                    sessionId = session.id,
+                    errorMessage = exception.message ?: "Unknown error"
+                )
                 Result.failure(exception)
             }
         )
@@ -64,6 +63,8 @@ class SyncToHealthConnectUseCase @Inject constructor(
             val failureCount = results.count { it.isFailure }
             
             Result.success(SyncResult(successCount, failureCount))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }

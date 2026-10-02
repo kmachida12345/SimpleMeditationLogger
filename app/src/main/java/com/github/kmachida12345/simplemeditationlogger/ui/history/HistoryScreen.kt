@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +26,7 @@ import com.github.kmachida12345.simplemeditationlogger.ui.theme.Dimensions
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -133,13 +135,11 @@ fun HistoryScreen(
 
 @Composable
 private fun HistoryItem(session: MeditationSession) {
-    // 多言語対応の日付フォーマット
-    val dateFormatter = if (Locale.getDefault().language == "ja") {
-        DateTimeFormatter.ofPattern("yyyy年M月d日", Locale.JAPAN)
-    } else {
-        DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US)
+    // 端末ロケールに応じた日付フォーマット
+    val dateFormatter = remember {
+        DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.getDefault())
     }
-    
+
     val localDate = session.startTime.atZone(ZoneId.systemDefault()).toLocalDate()
     val formattedDate = localDate.format(dateFormatter)
     
@@ -176,12 +176,12 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(Dimensions.Spacing.Medium))
         Text(
-            text = "No meditation history yet",
+            text = stringResource(R.string.history_empty_title),
             fontSize = 16.sp,
             color = Color.Gray
         )
         Text(
-            text = "Start your first session!",
+            text = stringResource(R.string.history_empty_subtitle),
             fontSize = 14.sp,
             color = Color.Gray
         )

@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -13,17 +14,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.kmachida12345.simplemeditationlogger.R
+import com.github.kmachida12345.simplemeditationlogger.domain.model.HealthConnectSyncStatus
 import com.github.kmachida12345.simplemeditationlogger.ui.theme.Primary
+import com.github.kmachida12345.simplemeditationlogger.ui.util.formatMinutesSeconds
 
 @Composable
 fun CompleteScreen(
-    durationSeconds: Long,
-    isHealthConnectSynced: Boolean = true,
+    durationSeconds: Int,
+    syncStatus: HealthConnectSyncStatus,
+    sessionSaved: Boolean,
     onBackToHome: () -> Unit
 ) {
     // Check icon pulse animation
@@ -72,7 +77,7 @@ fun CompleteScreen(
                 
                 // Duration Display
                 Text(
-                    text = formatDuration(durationSeconds),
+                    text = formatMinutesSeconds(durationSeconds),
                     fontSize = 96.sp,
                     fontWeight = FontWeight.Bold,
                     color = Primary,
@@ -90,33 +95,25 @@ fun CompleteScreen(
                 )
                 
                 Spacer(modifier = Modifier.height(32.dp))
-                
-                // TODO: Health Connect Badge
-//                if (isHealthConnectSynced) {
-//                    Surface(
-//                        shape = CircleShape,
-//                        color = Color(0xFFF0F4F8)
-//                    ) {
-//                        Row(
-//                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-//                            verticalAlignment = Alignment.CenterVertically,
-//                            horizontalArrangement = Arrangement.Center
-//                        ) {
-//                            Icon(
-//                                imageVector = Icons.Default.Favorite,
-//                                contentDescription = null,
-//                                tint = Color.Gray,
-//                                modifier = Modifier.size(18.dp)
-//                            )
-//                            Spacer(modifier = Modifier.width(8.dp))
-//                            Text(
-//                                text = stringResource(R.string.complete_health_saved),
-//                                fontSize = 14.sp,
-//                                color = Color.Gray
-//                            )
-//                        }
-//                    }
-//                }
+
+                // 保存・同期の実結果をバッジで表示する
+                when {
+                    !sessionSaved -> StatusBadge(
+                        icon = Icons.Default.Warning,
+                        text = stringResource(R.string.complete_save_failed),
+                        isError = true
+                    )
+                    syncStatus == HealthConnectSyncStatus.SYNCED -> StatusBadge(
+                        icon = Icons.Default.Favorite,
+                        text = stringResource(R.string.complete_health_saved),
+                        isError = false
+                    )
+                    syncStatus == HealthConnectSyncStatus.SYNC_FAILED -> StatusBadge(
+                        icon = Icons.Default.Warning,
+                        text = stringResource(R.string.complete_health_sync_failed),
+                        isError = true
+                    )
+                }
             }
             
             // Footer Button
@@ -147,9 +144,33 @@ fun CompleteScreen(
     }
 }
 
-private fun formatDuration(durationSeconds: Long): String {
-    val minutes = durationSeconds / 60
-    val seconds = durationSeconds % 60
-    
-    return "%d:%02d".format(minutes, seconds)
+@Composable
+private fun StatusBadge(
+    icon: ImageVector,
+    text: String,
+    isError: Boolean
+) {
+    Surface(
+        shape = CircleShape,
+        color = if (isError) MaterialTheme.colorScheme.errorContainer else Color(0xFFF0F4F8)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (isError) MaterialTheme.colorScheme.onErrorContainer else Color.Gray,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = text,
+                fontSize = 14.sp,
+                color = if (isError) MaterialTheme.colorScheme.onErrorContainer else Color.Gray
+            )
+        }
+    }
 }
