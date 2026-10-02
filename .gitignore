@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+.claude/settings.local.json
+.claude/worktrees/
+
+.kotlin/
+/app/release/
