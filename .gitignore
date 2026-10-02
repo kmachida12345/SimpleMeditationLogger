@@ -19,3 +19,8 @@ local.properties
 
 .kotlin/
 /app/release/
+
+# Release secrets
+*.jks
+*.keystore
+play-service-account*.json

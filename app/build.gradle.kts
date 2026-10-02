@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.play.publisher)
     alias(libs.plugins.oss.licenses)
     alias(libs.plugins.kotlin.serialization)
 }
@@ -26,8 +27,25 @@ android {
         }
     }
 
+    // CI では環境変数、ローカルでは ~/.gradle/gradle.properties から取得。未設定なら署名なし
+    fun signingValue(name: String): String? =
+        System.getenv(name) ?: providers.gradleProperty(name).orNull
+
+    val releaseStoreFile = signingValue("KEYSTORE_FILE")?.let { file(it) }
+    signingConfigs {
+        if (releaseStoreFile != null) {
+            create("release") {
+                storeFile = releaseStoreFile
+                storePassword = signingValue("KEYSTORE_PASSWORD")
+                keyAlias = signingValue("KEY_ALIAS")
+                keyPassword = signingValue("KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfigs.findByName("release")?.let { signingConfig = it }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -47,6 +65,15 @@ android {
         compose = true
         buildConfig = true
     }
+}
+
+play {
+    // CI の PLAY_SERVICE_ACCOUNT_JSON_PATH で指定した JSON キーで internal トラックへ配信
+    System.getenv("PLAY_SERVICE_ACCOUNT_JSON_PATH")?.let {
+        serviceAccountCredentials.set(file(it))
+    }
+    track.set("internal")
+    defaultToAppBundles.set(true)
 }
 
 dependencies {
