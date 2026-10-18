@@ -68,46 +68,26 @@ app.versionName=1.0.1
 
 ## リリースワークフロー
 
-### 1. 開発完了後
+リリースは GitHub Actions で自動化されています（詳細は `RELEASE_GUIDE.md` の「10. Play Console への自動アップロード」）。
+
+### 通常の流れ
+
+1. 機能や修正を master にマージしていく
+2. 前回のリリース後に自動作成された **バージョンアップ PR**（`chore/bump-version` ブランチ、versionCode+1 / patch+1）を、リリースしたいタイミングでマージする
+   - minor / major にしたい場合は、その PR のブランチ上で `gradle.properties` の `app.versionName` を書き換えてからマージ
+3. master で versionCode が増えたことを検知して `v<versionName>` タグが付き、Play Console の internal トラックへ自動アップロードされる
+4. アップロード成功後、次のバージョンアップ PR が自動で作られる
+
+### 手動でバージョンを上げる場合
 
 ```bash
-# 変更内容をコミット
-git add .
-git commit -m "feat: 新機能を追加"
-```
-
-### 2. バージョン更新
-
-```bash
-# バージョンアップ（例: patch）
-./bump-version.sh patch
-
-# 提案されたコマンドを実行
+./bump-version.sh minor
 git add gradle.properties
-git commit -m "chore: bump version to 1.0.1"
+git commit -m "chore: bump version to 1.3.0"
+git push origin master   # versionCode が増えていればタグ付け〜アップロードが自動で走る
 ```
 
-### 3. リリースビルド
-
-```bash
-# AABを作成（Google Play用）
-./gradlew bundleRelease
-
-# または APKを作成
-./gradlew assembleRelease
-```
-
-### 4. Gitタグを作成
-
-```bash
-# タグを作成
-git tag -a v1.0.1 -m "Release version 1.0.1"
-
-# リモートにプッシュ
-git push origin master --tags
-```
-
-### 5. リリースノート作成
+### リリースノート作成
 
 GitHub Releasesでリリースノートを作成：
 
@@ -176,21 +156,6 @@ app.versionName=1.1.0-SNAPSHOT
 A: versionNameとGitタグは一致させるのが推奨です：
 - versionName: `1.0.1`
 - Gitタグ: `v1.0.1`
-
-## 自動化のヒント
-
-### GitHub Actionsでの自動バージョニング
-
-将来的に CI/CD を導入する場合、GitHub Actionsでバージョンを自動取得できます：
-
-```yaml
-- name: Get version
-  run: |
-    VERSION_NAME=$(grep "app.versionName=" gradle.properties | cut -d'=' -f2)
-    VERSION_CODE=$(grep "app.versionCode=" gradle.properties | cut -d'=' -f2)
-    echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
-    echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
-```
 
 ## 参考リンク
 

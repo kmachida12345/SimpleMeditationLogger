@@ -20,8 +20,8 @@ SimpleMeditationLogger is a single-module Android app (Kotlin, Jetpack Compose, 
 
 ## Versioning / Releases
 
-- `versionCode`/`versionName` are defined as `app.versionCode`/`app.versionName` in `gradle.properties` and read by `app/build.gradle.kts` `defaultConfig`. Bump versions with `./bump-version.sh [patch|minor|major]` (interactive; edits `gradle.properties`) — see VERSIONING.md.
-- Pushing a `v*` tag runs `.github/workflows/release.yml`, which uploads a signed AAB to the Play Console internal track via Gradle Play Publisher (`publishReleaseBundle`); the tag must match `app.versionName`.
+- `versionCode`/`versionName` are defined as `app.versionCode`/`app.versionName` in `gradle.properties` and read by `app/build.gradle.kts` `defaultConfig`. Bump versions with `./bump-version.sh [patch|minor|major]` (interactive unless `-y` is passed; edits `gradle.properties`) — see VERSIONING.md.
+- Release automation: when a push to master increases `app.versionCode`, `.github/workflows/tag-on-version-bump.yml` tags `v<versionName>` and calls `release.yml`, which uploads a signed AAB to the Play Console internal track via Gradle Play Publisher (`publishReleaseBundle`) and then opens the next bump PR (`chore/bump-version`, versionCode+1 / patch+1). Pushing a `v*` tag manually also runs `release.yml`; the tag must match `app.versionName`.
 - Release flow (signing setup, Google Play checklist) is documented in RELEASE_GUIDE.md.
 
 ## Architecture

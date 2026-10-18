@@ -1,10 +1,13 @@
 #!/bin/bash
 # バージョン更新スクリプト
-# 使い方: ./bump-version.sh [patch|minor|major]
+# 使い方: ./bump-version.sh [patch|minor|major] [-y]
+#   -y: 確認せずに適用（CI 用）
 
 set -e
 
 GRADLE_PROPERTIES="gradle.properties"
+assume_yes=false
+[ "$2" = "-y" ] && assume_yes=true
 
 if [ ! -f "$GRADLE_PROPERTIES" ]; then
     echo "Error: gradle.properties が見つかりません"
@@ -41,7 +44,7 @@ case "$1" in
         echo "メジャーバージョンを更新"
         ;;
     *)
-        echo "使い方: $0 [patch|minor|major]"
+        echo "使い方: $0 [patch|minor|major] [-y]"
         echo ""
         echo "  patch: バグ修正 (例: 1.0.0 -> 1.0.1)"
         echo "  minor: 機能追加 (例: 1.0.0 -> 1.1.0)"
@@ -57,11 +60,13 @@ new_version_name="$major.$minor.$patch"
 echo "新しいバージョン: $new_version_name (code: $new_version_code)"
 
 # 確認
-read -p "この変更を適用しますか? [y/N]: " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "キャンセルしました"
-    exit 0
+if [ "$assume_yes" != true ]; then
+    read -p "この変更を適用しますか? [y/N]: " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "キャンセルしました"
+        exit 0
+    fi
 fi
 
 # gradle.properties を更新
@@ -74,5 +79,4 @@ echo ""
 echo "次のステップ:"
 echo "1. git add gradle.properties"
 echo "2. git commit -m \"chore: bump version to $new_version_name\""
-echo "3. git tag -a v$new_version_name -m \"Release version $new_version_name\""
-echo "4. git push origin master --tags"
+echo "3. master に push（または PR をマージ）すると v$new_version_name タグが付き、Play の internal トラックへ自動アップロードされます"

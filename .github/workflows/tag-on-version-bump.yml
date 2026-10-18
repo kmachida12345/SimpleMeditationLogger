@@ -1,0 +1,55 @@
+name: Tag and release on version bump
+
+# master の gradle.properties で versionCode が増えたら v<versionName> タグを付けてリリースする
+on:
+  push:
+    branches: [master]
+    paths: [gradle.properties]
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create tag if versionCode increased
+        id: tag
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          prop() { git show "$1:gradle.properties" 2>/dev/null | grep "^app.$2=" | cut -d= -f2; }
+          new_code=$(prop HEAD versionCode)
+          old_code=$(prop "$BEFORE" versionCode)
+          name=$(prop HEAD versionName)
+          tag="v${name}"
+
+          # 直前のコミットに versionCode が無い場合（初回導入時など）は既存リリースの再アップロードを避けてスキップ
+          if [ -z "$old_code" ] || [ "$new_code" -le "$old_code" ]; then
+            echo "versionCode not increased (${old_code:-none} -> ${new_code}); skip"
+            exit 0
+          fi
+          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+            echo "Tag ${tag} already exists (released manually?); skip"
+            exit 0
+          fi
+
+          git tag "$tag"
+          git push origin "$tag"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: tag
+    if: needs.tag.outputs.tag != ''
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ needs.tag.outputs.tag }}
+    secrets: inherit

@@ -171,7 +171,18 @@ app.versionName=1.0.1
 
 ## 10. Play Console への自動アップロード（GitHub Actions）
 
-`v*` タグを push すると `.github/workflows/release.yml` が走り、テスト → 署名付きAAB生成 → Play Console の **internal トラック**へ自動アップロードします（本番昇格は Console で手動）。
+リリースは次のサイクルで自動化されています（本番昇格は Console で手動）。
+
+```
+バージョンアップ PR をマージ
+  → tag-on-version-bump.yml: master で versionCode が増えたら v<versionName> タグを作成
+  → release.yml: テスト → 署名付きAAB → internal トラックへアップロード
+  → release.yml: 次バージョン（versionCode+1 / patch+1）の PR を自動作成
+```
+
+- `v*` タグを手で push しても `release.yml` が走ります（その後のバージョンアップ PR 作成も同じ）。
+- 直前のコミットより versionCode が増えていない push ではタグを作りません。同名タグが既にある場合もスキップします。
+- バージョンアップ PR が既に開いている場合は新しく作りません。
 
 ### 初期設定（1回のみ）
 
@@ -186,12 +197,17 @@ app.versionName=1.0.1
 | `KEYSTORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD` | キーストア情報 |
 | `PLAY_SERVICE_ACCOUNT_JSON` | サービスアカウントJSONの中身 |
 
+5. GitHub の Settings > Actions > General > Workflow permissions で **「Allow GitHub Actions to create and approve pull requests」を有効化**（バージョンアップ PR の自動作成に必要）
+
 ### リリース手順
+
+通常は、開いているバージョンアップ PR をリリースしたいタイミングでマージするだけです。
+
+PR がまだ無い場合（初回など）は手動で上げて push します：
 
 ```bash
 ./bump-version.sh patch      # versionCode は既アップロード分より大きくする
-git commit -am "chore: bump version" && git push
-git tag v1.2.1 && git push origin v1.2.1   # タグは app.versionName と一致させる
+git commit -am "chore: bump version" && git push origin master
 ```
 
 ローカルから署名ビルドする場合は `KEYSTORE_FILE`（キーストアのパス）、`KEYSTORE_PASSWORD`、`KEY_ALIAS`、`KEY_PASSWORD` を環境変数または `~/.gradle/gradle.properties` に設定します。未設定の場合、release ビルドは署名されません。
